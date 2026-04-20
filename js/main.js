@@ -312,6 +312,7 @@ function buildRoom() {
   buildGasCans();
   buildBatteryItems();
   buildHideSpots();
+  buildDoorLeadLabels();
   updateEnemyCount();
 
   // Pacifist talk-down prompt
@@ -332,6 +333,31 @@ function buildVentAccess(){
     scene.add(makeBox(0.22,0.02,1.0,0x888888, vent.roomX + slat*0.30, 0.12, vent.roomZ));
   }
   addLabel(crouching ? 'F = ENTER VENT' : 'CROUCH + F = ENTER VENT', vent.roomX, 1.1, vent.roomZ, '#88ddff');
+}
+
+function buildDoorLeadLabels(){
+  if(currentSpot==='cafeteria') return; // cafeteria already uses large hub labels
+  var doors = ROOM_DOORS[currentSpot] || [];
+  doors.forEach(function(door){
+    var label = ROOM_NAMES[door.dest] || door.dest.toUpperCase();
+    var lx = 0, lz = 0;
+
+    if(door.wall==='N'){
+      lx = door.center;
+      lz = -ROOM_HALF + 1.0;
+    } else if(door.wall==='S'){
+      lx = door.center;
+      lz = ROOM_HALF - 1.0;
+    } else if(door.wall==='W'){
+      lx = -ROOM_HALF + 1.0;
+      lz = door.center;
+    } else {
+      lx = ROOM_HALF - 1.0;
+      lz = door.center;
+    }
+
+    addLabel('TO ' + label, lx, 1.7, lz, '#ffbb66');
+  });
 }
 
 function buildHideSpots(){
