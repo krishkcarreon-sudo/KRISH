@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Shell page for the game UI, canvas, and script loading. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haunted Farm 3D</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+
+<div id="ui">
+  <div id="hud">
+    <div>HP <span id="hp-num">100</span></div>
+    <div id="hp-bar"><div id="hp-fill" style="width:100%"></div></div>
+    <div style="margin-top:6px">PWR <span id="pwr-num">100</span>%</div>
+    <div id="pwr-bar"><div id="pwr-fill" style="width:100%"></div></div>
+    <div style="margin-top:6px" id="weapon-label">Weapon: Fists</div>
+    <div id="ammo-label">Ammo: 0</div>
+    <div id="gascans-label">Gas Cans: 0</div>
+    <div id="ingredients-label">Ingredients: 0</div>
+    <div id="trap-label">&#128009; TRAPS: 0</div>
+    <div id="bone-label">+ BONE</div>
+    <div id="key-label">&#128273; ESCAPE KEY</div>
+    <div id="dog-label">&#128021; Dog companion!</div>
+    <div id="enemy-count"></div>
+  </div>
+
+  <div id="room-label">
+    <div id="room-name">CAFETERIA</div>
+    <div id="time-disp">9 PM</div>
+  </div>
+
+  <div id="crosshair"></div>
+  <div id="msg"></div>
+  <div id="stage-alert"></div>
+  <div id="dmg-flash"></div>
+
+  <div id="boss-bar">
+    <div class="boss-label" id="boss-name">THE FARMER</div>
+    <div id="boss-fill-bg"><div id="boss-fill" style="width:100%"></div></div>
+  </div>
+
+  <div id="weapon-bar">
+    <span class="weapon-slot flash-slot owned" id="ws0">0:&#128294;</span>
+    <span class="weapon-slot active" id="ws1">1:Fists</span>
+    <span class="weapon-slot"        id="ws2">2:OfficeBat</span>
+    <span class="weapon-slot"        id="ws3">3:WoodBat</span>
+    <span class="weapon-slot"        id="ws4">4:Crowbar</span>
+    <span class="weapon-slot"        id="ws5">5:Axe</span>
+    <span class="weapon-slot"        id="ws6">6:Shotgun&#9733;</span>
+    <span class="weapon-slot"        id="ws7">7:Taser&#9889;</span>
+    <span class="weapon-slot"        id="ws8">8:Knife</span>
+    <span class="weapon-slot"        id="ws9">9:Pistol&#128299;</span>
+  </div>
+
+  <div id="door-prompt"></div>
+
+  <div id="controls-hint">
+    W/S = Move &nbsp;|&nbsp; A/D = Turn &nbsp;|&nbsp; Q/E = Strafe &nbsp;|&nbsp; Mouse = Look<br>
+    Click = Attack &nbsp;|&nbsp; Space = Crouch &nbsp;|&nbsp; J = Jump &nbsp;|&nbsp; 1-9 = Weapons<br>
+    0 = Flashlight &nbsp;|&nbsp; F = Interact &nbsp;|&nbsp; T = Bear Trap &nbsp;|&nbsp; Crouch + F = Vents
+  </div>
+</div>
+
+<div id="power-warning">&#9888; GENERATOR FAILURE &mdash; find gas cans and refuel the generator</div>
+<div id="heartbeat"></div>
+<div id="paranoia-flash"></div>
+<div id="jumpscare"></div>
+
+<div id="camera-view">
+  <div id="cv-header">
+    <span id="cv-signal">&#9679; REC</span>
+    <span id="cv-title">SECURITY CAMERAS</span>
+    <span id="cv-pwr">PWR: <span id="cv-pwr-val">100</span>%</span>
+  </div>
+  <div id="cv-tabs">
+    <span class="cv-tab" id="cvt0">CAM 1: BARN</span>
+    <span class="cv-tab" id="cvt1">CAM 2: PASTURE</span>
+    <span class="cv-tab" id="cvt2">CAM 3: FRONT GATE</span>
+  </div>
+  <div id="cv-screen">
+    <div id="cv-scanlines"></div>
+    <div id="cv-room-name"></div>
+    <div id="cv-entity-list"></div>
+  </div>
+  <div id="cv-footer">&#9668; / &#9658; = cycle cameras &nbsp;|&nbsp; F = close &nbsp;|&nbsp; drains PWR while open</div>
+</div>
+
+<div id="fl-vignette"></div>
+<div id="lock-prompt" onclick="requestLock()">&#128269; Click to enable mouse look</div>
+
+<div id="overlay">
+  <h1>HAUNTED FARM 3D</h1>
+  <p>Survive the haunted night. When dawn comes, find the <span style="color:#ffe44a">&#128273; ESCAPE KEY</span>
+  and reach the <span style="color:#88ff88">FRONT GATE</span> — or defeat The Farmer!</p>
+  <p>Animatronics leave the barn stage as the night grows darker...<br>
+  <span style="color:#ff8844">⚠ BIG animatronics (COW, WOLF, TURKEY) are 2.5× stronger &amp; faster!</span><br>
+  <span style="color:#44aaff">Visit the WORKSHOP off the Barn for lore — and to revive your dog with a bone.</span><br>
+  <span style="color:#ffcc88">The FARMHOUSE now connects to a KITCHEN where you can gather ingredients and cook meals.</span><br>
+  <span style="color:#88ddff">Some rooms now hide vents you can only crawl through while crouching. Only the rat can follow you inside.</span><br>
+  <span style="color:#cc88ff">Beware: if they catch you, you'll be converted into one of them...</span></p>
+  <p class="sub-text">
+    W/S = move &nbsp;|&nbsp; A/D = turn &nbsp;|&nbsp; Q/E = strafe &nbsp;|&nbsp; ↑↓ = pitch &nbsp;|&nbsp; Mouse = look (click canvas) &nbsp;|&nbsp; Walk through doorways<br>
+    Space = crouch &nbsp;|&nbsp; J = jump &nbsp;|&nbsp; Click = attack &nbsp;|&nbsp; 1-6 = weapons &nbsp;|&nbsp; 0 = flashlight &nbsp;|&nbsp; F = interact / cook &nbsp;|&nbsp; T = place bear trap &nbsp;|&nbsp; Crouch + F = vents
+  </p>
+  <button id="start-btn" onclick="startGame()">ENTER THE FARM</button>
+</div>
+
+<div id="cutscene">
+  <div class="cs-title" id="cs-title">CUTSCENE</div>
+  <div class="cs-scene" id="cs-scene"></div>
+  <div class="cs-caption" id="cs-caption"></div>
+  <div class="cs-skip" id="cs-skip" onclick="skipCutscene()">[ Click or press any key to continue ]</div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div id="err-display" style="display:none;position:fixed;top:0;left:0;width:100%;background:#f00;color:#fff;font-size:13px;font-family:monospace;padding:10px;z-index:9999;white-space:pre-wrap;word-break:break-all;max-height:40vh;overflow-y:auto"></div>
+<script>window.onerror=function(msg,src,line,col){var el=document.getElementById('err-display');if(el){el.style.display='block';el.textContent+='ERROR: '+msg+'\n  at '+src+':'+line+':'+col+'\n';}}</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/data/weapons.js"></script>
+<script src="js/data/items.js"></script>
+<script src="js/data/rooms.js"></script>
+<script src="js/data/bots.js"></script>
+<script src="js/state.js"></script>
+<script src="js/systems/characterBuilder.js"></script>
+<script src="js/systems/combat.js"></script>
+<script src="js/systems/input.js"></script>
+<script src="js/systems/ui.js"></script>
+<script src="js/systems/cutscenes.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

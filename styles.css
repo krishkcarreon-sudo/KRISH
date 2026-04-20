@@ -1,0 +1,547 @@
+/* Visual styling for the Haunted Farm 3D shell and overlays. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+
+#canvas { display: block; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; cursor: crosshair; }
+
+#ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+  font-family: 'Courier New', monospace; color: #fff; z-index: 10; }
+
+#hud { position: absolute; top: 14px; left: 14px; font-size: 13px; text-shadow: 1px 1px 4px #000; }
+#hud > div { margin: 3px 0; }
+#hp-bar   { width: 180px; height: 9px;  background: #400; border-radius: 5px; overflow: hidden; margin-top: 2px; }
+#hp-fill  { height: 100%; background: #e44; border-radius: 5px; transition: width 0.2s; }
+#pwr-bar  { width: 140px; height: 7px;  background: #220; border-radius: 4px; overflow: hidden; margin-top: 2px; }
+#pwr-fill { height: 100%; background: #ee4; border-radius: 4px; }
+
+#crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 28px; height: 28px; }
+#crosshair::before,#crosshair::after { content:''; position:absolute; background:rgba(255,255,255,.75); }
+#crosshair::before { width:2px; height:28px; left:13px; top:0; }
+#crosshair::after  { width:28px; height:2px; left:0; top:13px; }
+
+#room-label { position: absolute; top: 14px; right: 14px; font-size: 13px; text-align: right; text-shadow: 1px 1px 4px #000; }
+
+#msg { position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); font-size: 13px;
+  background: rgba(0,0,0,.78); padding: 7px 18px; border-radius: 7px;
+  opacity: 0; transition: opacity 0.4s; pointer-events: none; white-space: nowrap; max-width: 80vw; text-align:center; }
+
+#stage-alert { position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+  font-size: 15px; color: #ff5555; background: rgba(0,0,0,.85); padding: 8px 22px;
+  border-radius: 8px; border: 1px solid #ff3333; opacity: 0; transition: opacity 0.5s;
+  pointer-events: none; white-space: nowrap; }
+
+#weapon-bar { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 5px; pointer-events: none; }
+.weapon-slot { background: rgba(0,0,0,.55); color: #555; border: 1px solid #333;
+  padding: 4px 8px; border-radius: 5px; font-size: 11px; font-family: 'Courier New',monospace; white-space: nowrap; }
+.weapon-slot.owned  { color: #ccc; border-color: #666; }
+.weapon-slot.active { color: #fff; border-color: #ff8844; background: rgba(255,136,68,.25); }
+.weapon-slot.flash-slot.fl-on { border-color: #ffee44; color: #ffe; background: rgba(255,238,68,.2); }
+
+#boss-bar { position: absolute; top: 46%; left: 50%; transform: translateX(-50%); width: 260px; display: none; }
+#boss-bar .boss-label { font-size: 12px; color: #f88; text-align: center; margin-bottom: 4px; }
+#boss-fill-bg { width: 260px; height: 11px; background: #400; border-radius: 6px; overflow: hidden; }
+#boss-fill { height: 100%; background: linear-gradient(90deg,#e44,#f88); border-radius: 6px; }
+
+#bone-label  { color: #fc8;    display: none; }
+#dog-label   { color: #4fc;    display: none; }
+#key-label   { color: #ffe44a; display: none; }
+#enemy-count { color: #f84; font-size: 12px; }
+
+#dmg-flash { position: fixed; top:0;left:0;width:100%;height:100%;
+  background:rgba(255,0,0,0); pointer-events:none; z-index:15; transition:none; }
+
+/* Flashlight vignette */
+#fl-vignette { position: fixed; top:0;left:0;width:100%;height:100%;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.90) 100%);
+  pointer-events:none; z-index:8; opacity:0; transition:opacity 0.4s; }
+#fl-vignette.on { opacity:1; }
+
+/* Door prompt */
+#door-prompt { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,.75); border: 1px solid #555; color: #ccc;
+  padding: 6px 16px; border-radius: 6px; font-size: 12px; opacity: 0; transition: opacity 0.3s; }
+#door-prompt.show { opacity: 1; }
+
+#controls-hint { position: absolute; bottom: 14px; right: 14px; font-size: 10px;
+  color: #444; text-align: right; pointer-events: none; line-height: 1.8; }
+
+/* Click-to-lock overlay */
+#lock-prompt { position: fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:rgba(0,0,0,.7); color:#888; font-size:14px; padding:14px 28px;
+  border-radius:8px; border:1px solid #333; pointer-events:all; cursor:pointer;
+  font-family:'Courier New',monospace; display:none; z-index:12; }
+
+/* Overlay */
+#overlay { position: fixed; top:0;left:0;width:100%;height:100%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.92); pointer-events:all; flex-direction:column;
+  gap:14px; z-index:20; }
+#overlay h1 { font-size:36px; color:#e44; font-family:'Courier New',monospace;
+  text-shadow:0 0 30px #f00; letter-spacing:4px; }
+#overlay p  { font-size:13px; color:#aaa; font-family:'Courier New',monospace;
+  text-align:center; max-width:480px; line-height:1.8; }
+#overlay .sub-text { color:#666; font-size:11px; }
+#start-btn { background:#c22; color:#fff; border:none; padding:11px 32px;
+  border-radius:8px; font-size:15px; cursor:pointer; font-family:'Courier New',monospace;
+  letter-spacing:2px; margin-top:4px; }
+#start-btn:hover { background:#e33; }
+
+/* ── CUTSCENE OVERLAY ──────────────────────────────────────────────────── */
+#cutscene {
+  position:fixed; top:0;left:0;width:100%;height:100%;
+  background:#000; z-index:50; display:none;
+  flex-direction:column; align-items:center; justify-content:center;
+  font-family:'Courier New',monospace; color:#fff; overflow:hidden;
+}
+#cutscene.active { display:flex; }
+.cs-title { font-size:22px; color:#ff5555; letter-spacing:3px; text-shadow:0 0 20px #f00; margin-bottom:18px; }
+.cs-scene  { width:90%; max-width:680px; background:#0a0a0a; border:1px solid #333;
+  border-radius:8px; padding:0; overflow:hidden; position:relative; height:200px; margin-bottom:16px; }
+.cs-caption { font-size:13px; color:#ccc; line-height:1.9; text-align:center; max-width:600px; }
+.cs-skip { margin-top:20px; color:#555; font-size:11px; cursor:pointer; }
+.cs-skip:hover { color:#888; }
+
+/* ── CONVERSION SCENE (game over) ─────────────────────────────────────────── */
+.conv-bg { position:absolute; inset:0; background:radial-gradient(ellipse at center,#1a0028 0%,#000 100%); }
+.conv-table { position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+  width:160px; height:22px; background:#2a1a3a; border:1px solid #553366;
+  border-radius:4px; box-shadow:0 0 12px #8833ff88; }
+.conv-player { position:absolute; bottom:40px; left:50%; transform:translateX(-50%);
+  font-size:38px; animation:convBody 4.5s forwards; }
+@keyframes convBody {
+  0%   { filter:none; transform:translateX(-50%) scale(1); }
+  30%  { filter:brightness(3) hue-rotate(80deg); transform:translateX(-50%) scale(1.1); }
+  60%  { filter:hue-rotate(200deg) sepia(1) brightness(1.4); }
+  100% { filter:hue-rotate(200deg) sepia(1) brightness(0.4) contrast(2); transform:translateX(-50%) scale(0.95); }
+}
+.conv-parts { position:absolute; top:18px; left:50%; transform:translateX(-50%);
+  font-size:22px; letter-spacing:6px; opacity:0; animation:convParts 2s 1.8s forwards; }
+@keyframes convParts {
+  0%  { opacity:0; transform:translateX(-50%) translateY(-10px); }
+  100%{ opacity:1; transform:translateX(-50%) translateY(0); }
+}
+.conv-bolt1,.conv-bolt2,.conv-bolt3 {
+  position:absolute; font-size:18px; animation:boltFly 0.5s infinite; }
+.conv-bolt1 { top:40%; left:28%; animation-delay:0s; }
+.conv-bolt2 { top:52%; right:28%; animation-delay:0.18s; }
+.conv-bolt3 { top:30%; left:50%; animation-delay:0.32s; }
+@keyframes boltFly {
+  0%  { opacity:1; transform:scale(1); }
+  50% { opacity:0.3; transform:scale(1.6) rotate(20deg); }
+  100%{ opacity:1; transform:scale(1); }
+}
+.conv-bar { position:absolute; bottom:6px; left:10%; width:80%; height:8px;
+  background:#1a0028; border-radius:4px; overflow:hidden; }
+.conv-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,#8833ff,#ff33cc);
+  border-radius:4px; animation:convFill 4s forwards; box-shadow:0 0 8px #ff33cc; }
+@keyframes convFill { 0%{width:0%} 100%{width:100%} }
+.conv-label { position:absolute; bottom:18px; left:0; width:100%; text-align:center;
+  font-size:10px; color:#aa88cc; font-family:'Courier New',monospace; letter-spacing:2px; }
+
+/* Police scene */
+.police-road { position:absolute; bottom:0; width:100%; height:60px; background:#333; }
+.police-road::after { content:''; position:absolute; top:50%; left:0; width:100%; height:4px;
+  background:repeating-linear-gradient(90deg,#ff0 0,#ff0 30px,transparent 30px,transparent 60px);
+  transform:translateY(-50%); }
+.police-car { position:absolute; bottom:15px; left:50%; transform:translateX(-50%);
+  width:80px; height:36px; background:#1a3a8a; border-radius:6px; }
+.police-car::before { content:''; position:absolute; top:-18px; left:15px;
+  width:50px; height:18px; background:#1a3a8a; border-radius:4px 4px 0 0; }
+.police-light { position:absolute; top:-24px; left:22px; width:36px; height:6px;
+  border-radius:3px; animation:policeFlash 0.3s infinite; }
+@keyframes policeFlash {
+  0%,49%  { background:#ff2222; box-shadow:0 0 12px #f00; }
+  50%,100%{ background:#2222ff; box-shadow:0 0 12px #00f; }
+}
+.farmer-cuffed { position:absolute; bottom:15px; right:80px; font-size:32px;
+  animation:farmerWalk 0.4s steps(2) infinite; }
+@keyframes farmerWalk { 0%{transform:translateY(0)} 100%{transform:translateY(-4px)} }
+.officer { position:absolute; bottom:15px; right:40px; font-size:28px; }
+
+/* Car crash scene */
+.road-scene { background:#1a1a1a; }
+.road-lines { position:absolute; width:100%; height:100%;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 44%,#555 44%,#555 56%,transparent 56%); }
+.player-car { position:absolute; bottom:50px; left:40%;
+  font-size:40px; filter:hue-rotate(120deg); transition:all 0.4s; }
+.player-car.crash { transform:rotate(45deg) scale(1.2); filter:hue-rotate(0deg) brightness(2); }
+.farmer-ghost { position:absolute; top:30px; left:50%; transform:translateX(-50%);
+  font-size:44px; opacity:0; animation:ghostAppear 1.2s 1.8s forwards; }
+@keyframes ghostAppear {
+  0%  { opacity:0; transform:translateX(-50%) scale(2); filter:blur(8px); }
+  60% { opacity:1; transform:translateX(-50%) scale(1); filter:blur(0); }
+  100%{ opacity:1; transform:translateX(-50%) scale(1); filter:blur(0); }
+}
+.crash-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-size:28px; color:#ff2222; font-weight:bold; letter-spacing:4px;
+  text-shadow:0 0 20px #f00; opacity:0; animation:crashFlash 0.6s 2.6s forwards; }
+@keyframes crashFlash {
+  0%  { opacity:0; transform:translate(-50%,-50%) scale(2); }
+  50% { opacity:1; }
+  100%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+}
+
+/* ── Jumpscare overlay ─────────────────────────────────────────────────────── */
+#jumpscare {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+  animation: jsShake 0.5s ease-out;
+}
+#jumpscare.active { display: flex; }
+@keyframes jsShake {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  15%  { transform: translate(-12px, 8px) rotate(-3deg); }
+  30%  { transform: translate(10px, -10px) rotate(3deg); }
+  45%  { transform: translate(-8px, 6px) rotate(-2deg); }
+  60%  { transform: translate(8px, -4px) rotate(2deg); }
+  80%  { transform: translate(-4px, 2px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.js-flash {
+  position: absolute; inset: 0;
+  opacity: 0.7;
+  animation: jsFlash 0.5s ease-out forwards;
+}
+@keyframes jsFlash {
+  0%   { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+.js-face {
+  position: relative; z-index: 1;
+  font-size: 120px;
+  animation: jsFace 0.5s ease-out forwards;
+  text-shadow: 0 0 40px rgba(255,255,255,0.8);
+}
+@keyframes jsFace {
+  0%   { transform: scale(2.5) rotate(-8deg); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: scale(1.0) rotate(0deg); opacity: 1; }
+}
+.js-scream {
+  position: relative; z-index: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 26px; font-weight: bold;
+  color: #ffffff;
+  letter-spacing: 0.4em;
+  text-shadow: 0 0 20px currentColor;
+  animation: jsText 0.5s ease-out forwards;
+}
+@keyframes jsText {
+  0%   { letter-spacing: 1.5em; opacity: 0; }
+  40%  { opacity: 1; }
+  100% { letter-spacing: 0.4em; opacity: 1; }
+}
+.js-sub {
+  position: relative; z-index: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 13px; color: #cc0000;
+  letter-spacing: 0.25em;
+  margin-top: 10px;
+  text-transform: uppercase;
+  animation: jsText 0.5s 0.1s ease-out both;
+}
+
+/* ── Security Camera Overlay ──────────────────────────────────────────────── */
+#camera-view {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 480px;
+  background: #000800;
+  border: 3px solid #004400;
+  box-shadow: 0 0 40px #00aa00, inset 0 0 20px #001400;
+  z-index: 800;
+  font-family: 'Courier New', monospace;
+  color: #00dd44;
+}
+#camera-view.active { display: block; }
+
+#cv-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 10px;
+  background: #001800;
+  border-bottom: 1px solid #004400;
+  font-size: 12px;
+}
+#cv-signal {
+  color: #ff3333;
+  animation: cvBlink 1.2s step-end infinite;
+}
+@keyframes cvBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+#cv-title { font-size: 13px; letter-spacing: 2px; color: #00ff66; }
+#cv-pwr   { font-size: 11px; color: #88cc88; }
+
+#cv-tabs {
+  display: flex; border-bottom: 1px solid #003300;
+}
+.cv-tab {
+  flex: 1; text-align: center;
+  padding: 5px 4px; font-size: 10px;
+  letter-spacing: 1px; color: #006622;
+  border-right: 1px solid #003300; cursor: default;
+}
+.cv-tab:last-child { border-right: none; }
+.cv-tab.active {
+  color: #00ff66;
+  background: #002200;
+  text-shadow: 0 0 8px #00ff66;
+}
+
+#cv-screen {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: #000a00;
+}
+#cv-scanlines {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.25) 3px, rgba(0,0,0,0.25) 4px
+  );
+  animation: cvFlicker 8s linear infinite;
+}
+@keyframes cvFlicker {
+  0%,96%,100%{ opacity:1 }  97%{ opacity:0.7 }  98%{ opacity:1 }  99%{ opacity:0.6 }
+}
+#cv-room-name {
+  position: relative; z-index: 2;
+  text-align: center; font-size: 18px;
+  letter-spacing: 4px; color: #00ff66;
+  text-shadow: 0 0 14px #00ff66;
+  padding: 22px 0 8px;
+}
+#cv-entity-list {
+  position: relative; z-index: 2;
+  padding: 0 18px; font-size: 13px;
+  line-height: 1.9;
+}
+.cv-entity { color: #00cc44; }
+.cv-dot    { color: #ff4444; }
+.cv-zone   { color: #88ffaa; font-size: 11px; }
+.cv-hp     { color: #ffcc00; font-size: 11px; }
+.cv-clear  { color: #006622; font-style: italic; letter-spacing: 2px; }
+
+#cv-footer {
+  text-align: center; font-size: 10px;
+  color: #006622; letter-spacing: 1px;
+  padding: 5px; border-top: 1px solid #003300;
+  background: #001400;
+}
+
+/* ── Bear Trap HUD label ──────────────────────────────────────────────────── */
+#trap-label {
+  display: none;
+  color: #cc8844;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ── Power failure states ─────────────────────────────────────────────────── */
+#power-warning {
+  display: none;
+  position: fixed;
+  bottom: 22px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.85);
+  border: 1px solid #ff2200;
+  color: #ff4400;
+  font-family: 'Courier New', monospace;
+  font-size: 13px; letter-spacing: 2px;
+  padding: 7px 20px;
+  z-index: 700;
+  animation: pwrPulse 1.2s ease-in-out infinite;
+}
+@keyframes pwrPulse {
+  0%,100% { opacity: 1;   text-shadow: 0 0 10px #ff2200; }
+  50%      { opacity: 0.4; text-shadow: none; }
+}
+
+/* HUD dims when power is dead */
+body.power-dead #ui       { opacity: 0.30; pointer-events: none; }
+body.power-dead #pwr-bar,
+body.power-dead #pwr-num  { opacity: 1 !important; }  /* keep PWR readable */
+#ui { transition: opacity 0.6s; }
+
+/* ── Horror atmosphere ────────────────────────────────────────────────────── */
+
+/* Heartbeat vignette — pulses at edges when HP is low */
+#heartbeat {
+  display: none;
+  position: fixed; inset: 0; z-index: 590; pointer-events: none;
+  background: radial-gradient(ellipse at center,
+    transparent 52%, rgba(140,0,0,0.55) 100%);
+}
+#heartbeat.slow {
+  display: block;
+  animation: hbPulse 1.5s ease-in-out infinite;
+}
+#heartbeat.fast {
+  display: block;
+  animation: hbPulse 0.55s ease-in-out infinite;
+}
+@keyframes hbPulse {
+  0%,100% { opacity: 0.15; }
+  50%     { opacity: 1.0;  }
+}
+
+/* Paranoia flash — brief white/red burst */
+#paranoia-flash {
+  display: none;
+  position: fixed; inset: 0; z-index: 580; pointer-events: none;
+  background: rgba(255,255,255,0.0);
+}
+#paranoia-flash.active {
+  display: block;
+  animation: pfFlash 0.45s ease-out forwards;
+}
+@keyframes pfFlash {
+  0%   { background: rgba(200,0,0,0.55); }
+  60%  { background: rgba(200,0,0,0.10); }
+  100% { background: rgba(200,0,0,0.00); display: none; }
+}
+
+/* ── Pacifist best ending ─────────────────────────────────────────────────── */
+.pacifist-bg {
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 80%, #0a1e0a 0%, #000 100%);
+}
+.pacifist-glow {
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 50%, rgba(100,255,150,0.10) 0%, transparent 70%);
+  animation:pacGlow 2s ease-in-out infinite alternate;
+}
+@keyframes pacGlow {
+  0%   { opacity:0.4; }
+  100% { opacity:1.0; }
+}
+.pacifist-player {
+  position:absolute; bottom:30px; left:36%;
+  font-size:34px; opacity:0;
+  animation:pacFigure 1s 0.3s both;
+}
+.pacifist-farmer {
+  position:absolute; bottom:30px; right:36%;
+  font-size:34px; opacity:0;
+  animation:pacFigure 1s 0.8s both;
+}
+.pacifist-dog {
+  position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
+  font-size:24px; opacity:0;
+  animation:pacFigure 1s 1.4s both;
+}
+@keyframes pacFigure {
+  0%   { opacity:0; transform:translateY(12px); }
+  100% { opacity:1; transform:translateY(0); }
+}
+.pacifist-truck {
+  position:absolute; bottom:30px; left:10%;
+  font-size:44px;
+  animation:truckDrive 3s 0.5s ease-out forwards;
+}
+.pacifist-dog-back {
+  position:absolute; bottom:52px; left:16%;
+  font-size:22px; opacity:0;
+  animation:truckDog 3s 0.5s ease-out forwards;
+}
+@keyframes truckDrive {
+  0%   { left:10%; opacity:1; }
+  100% { left:80%; opacity:0.6; }
+}
+@keyframes truckDog {
+  0%   { left:16%; opacity:1; }
+  100% { left:86%; opacity:0.6; }
+}
+
+/* ── Reveal ending: wake up in room ──────────────────────────────────────── */
+.reveal-room {
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 120%, #1a0e08 0%, #000 80%);
+}
+.reveal-photo-frame {
+  position:absolute; top:22px; left:50%; transform:translateX(-50%);
+  width:120px; height:78px;
+  background:#1c1208; border:5px solid #5a3a1a;
+  box-shadow:0 0 22px #0006, inset 0 0 10px #0006;
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; letter-spacing:6px;
+  opacity:0; animation:photoFadeIn 2s 0.6s both;
+}
+@keyframes photoFadeIn {
+  0%   { opacity:0; filter:blur(6px); }
+  100% { opacity:1; filter:blur(0); }
+}
+.reveal-player-fig {
+  position:absolute; bottom:22px; left:46%;
+  font-size:30px; opacity:0;
+  animation:photoFadeIn 1.2s 0.2s both;
+}
+.reveal-sorry {
+  position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+  color:#ccbbaa; font-size:14px; font-style:italic; letter-spacing:1px;
+  opacity:0; white-space:nowrap;
+  animation:sorryFade 1.4s 3.2s both;
+}
+@keyframes sorryFade {
+  0%   { opacity:0; }
+  100% { opacity:1; }
+}
+
+/* ── Police interrogation room ───────────────────────────────────────────── */
+.interrog-room { position:absolute; inset:0; background:#08090e; }
+.interrog-table {
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  width:72%; height:44px; background:#161c26;
+  border-top:2px solid #2a3340;
+}
+.interrog-lamp {
+  position:absolute; top:8px; left:50%; transform:translateX(-50%);
+  width:6px; height:56px; background:#252525;
+}
+.interrog-lamp::after {
+  content:''; position:absolute; bottom:-4px; left:50%;
+  transform:translateX(-50%); width:32px; height:7px;
+  background:#444; border-radius:3px;
+  box-shadow:0 0 28px rgba(255,220,120,0.45);
+}
+.interrog-officer {
+  position:absolute; bottom:44px; left:55%;
+  font-size:32px;
+}
+.interrog-subject {
+  position:absolute; bottom:44px; right:55%;
+  font-size:32px; transform:scaleX(-1);
+}
+.interrog-line1 {
+  position:absolute; top:16px; left:8%; right:8%;
+  color:#7a88aa; font-size:11px; font-style:italic; text-align:center;
+  opacity:0; animation:iLineFade 1s 0.6s both;
+}
+.interrog-line2 {
+  position:absolute; top:36px; left:8%; right:8%;
+  color:#9aabcc; font-size:11px; font-style:italic; text-align:center;
+  opacity:0; animation:iLineFade 1s 1.8s both;
+}
+@keyframes iLineFade {
+  0%   { opacity:0; transform:translateY(6px); }
+  100% { opacity:1; transform:translateY(0); }
+}
+
+/* Screen shake on damage */
+@keyframes dmgShake {
+  0%   { transform: translate(0,0) rotate(0deg); }
+  15%  { transform: translate(-9px,5px) rotate(-1.2deg); }
+  30%  { transform: translate(8px,-7px) rotate(1.0deg); }
+  50%  { transform: translate(-6px,4px) rotate(-0.6deg); }
+  70%  { transform: translate(5px,-3px) rotate(0.4deg); }
+  90%  { transform: translate(-2px,1px) rotate(-0.2deg); }
+  100% { transform: translate(0,0) rotate(0deg); }
+}
+#canvas.shake {
+  animation: dmgShake 0.38s ease-out;
+}
