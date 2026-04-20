@@ -2890,7 +2890,7 @@ function enterHideSpot(type, spot){
   hiddenType = type;
   hiddenSpotId = spot.id;
   hiddenAnchor = spot;
-  crouching = (type==='table');
+  crouching = false;
   playerPos.x = spot.x;
   playerPos.z = spot.z;
   jumpOffset = 0;
@@ -3584,7 +3584,7 @@ function animate(){
     if(keys['KeyE']) playerPos.addScaledVector(right,   speed);
   }
   clampPlayerAgainstRoomSolids(prevX, prevZ);
-  var groundY = crouchActive ? 0.85 : 1.6;
+  var groundY = hiddenType==='table' ? 0.48 : (crouchActive ? 0.85 : 1.6);
   if(hiddenType && hiddenAnchor){
     playerPos.x = hiddenAnchor.x;
     playerPos.z = hiddenAnchor.z;

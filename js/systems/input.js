@@ -68,6 +68,7 @@ document.addEventListener('keydown', function(e){
 
   if(e.code === 'KeyF'){
     e.preventDefault();
+    if(e.repeat) return;
     if(cameraActive){ closeCameraView(); return; }
     doInteract();
     return;
