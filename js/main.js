@@ -2791,22 +2791,48 @@ function clampPlayerAgainstRoomSolids(prevX, prevZ){
   var solids = ROOM_SOLIDS[currentSpot] || [];
   if(!solids.length) return;
 
-  for(var i=0;i<solids.length;i++){
-    var solid = solids[i];
-    if(!overlapsSolidRect(playerPos.x, playerPos.z, solid)) continue;
+  for(var pass=0; pass<3; pass++){
+    var moved = false;
+    for(var i=0;i<solids.length;i++){
+      var solid = solids[i];
+      if(!overlapsSolidRect(playerPos.x, playerPos.z, solid)) continue;
 
-    // Try resolving one axis at a time so sliding along furniture still feels natural.
-    var canKeepX = !overlapsSolidRect(playerPos.x, prevZ, solid);
-    var canKeepZ = !overlapsSolidRect(prevX, playerPos.z, solid);
+      var minX = solid.x - (solid.hw + PLAYER_COLLISION_RADIUS);
+      var maxX = solid.x + (solid.hw + PLAYER_COLLISION_RADIUS);
+      var minZ = solid.z - (solid.hd + PLAYER_COLLISION_RADIUS);
+      var maxZ = solid.z + (solid.hd + PLAYER_COLLISION_RADIUS);
 
-    if(canKeepX && !canKeepZ){
-      playerPos.z = prevZ;
-    } else if(!canKeepX && canKeepZ){
-      playerPos.x = prevX;
-    } else {
-      playerPos.x = prevX;
-      playerPos.z = prevZ;
+      // If the previous spot was safe, prefer sliding back toward it.
+      if(prevX !== undefined && prevZ !== undefined && !overlapsSolidRect(prevX, prevZ, solid)){
+        var canKeepX = !overlapsSolidRect(playerPos.x, prevZ, solid);
+        var canKeepZ = !overlapsSolidRect(prevX, playerPos.z, solid);
+        if(canKeepX && !canKeepZ){
+          playerPos.z = prevZ;
+          moved = true;
+          continue;
+        }
+        if(!canKeepX && canKeepZ){
+          playerPos.x = prevX;
+          moved = true;
+          continue;
+        }
+      }
+
+      // If we're still inside, push to the nearest outer edge.
+      var pushLeft  = Math.abs(playerPos.x - minX);
+      var pushRight = Math.abs(maxX - playerPos.x);
+      var pushUp    = Math.abs(playerPos.z - minZ);
+      var pushDown  = Math.abs(maxZ - playerPos.z);
+      var smallest = Math.min(pushLeft, pushRight, pushUp, pushDown);
+
+      if(smallest === pushLeft)      playerPos.x = minX - 0.02;
+      else if(smallest === pushRight) playerPos.x = maxX + 0.02;
+      else if(smallest === pushUp)    playerPos.z = minZ - 0.02;
+      else                            playerPos.z = maxZ + 0.02;
+      moved = true;
     }
+
+    if(!moved) break;
   }
 }
 
