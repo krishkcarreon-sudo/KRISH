@@ -2993,8 +2993,8 @@ function navigate(room, fromWall){
   doorTransitionCooldown = 0.28;
 
   // Face inward
-  if(entryWall==='N')      camYaw=0;
-  else if(entryWall==='S') camYaw=Math.PI;
+  if(entryWall==='N')      camYaw=Math.PI;
+  else if(entryWall==='S') camYaw=0;
   else if(entryWall==='W') camYaw=-Math.PI/2;
   else                     camYaw= Math.PI/2;
   camPitch=0;
