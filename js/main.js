@@ -72,6 +72,19 @@ var VENT_LINKS = {
   generator_room:{ roomX:-7.4, roomZ: 7.2, ventX: 8.0, ventZ:-3.2, label:'GENERATOR' },
 };
 
+var TABLE_HIDE_SPOTS = [
+  { id:'caf_table_west',   room:'cafeteria', x:-4.0, z: 1.5, exitX:-4.0, exitZ: 3.2, label:'TABLE' },
+  { id:'caf_table_center', room:'cafeteria', x: 0.0, z: 1.5, exitX: 0.0, exitZ: 3.2, label:'TABLE' },
+  { id:'caf_table_east',   room:'cafeteria', x: 4.0, z: 1.5, exitX: 4.0, exitZ: 3.2, label:'TABLE' },
+  { id:'farm_table',       room:'farmhouse', x: 0.0, z:-4.5, exitX: 0.0, exitZ:-2.8, label:'DINING TABLE' },
+  { id:'kitchen_table',    room:'kitchen',   x: 7.0, z: 4.3, exitX: 7.0, exitZ: 6.1, label:'KITCHEN TABLE' },
+];
+
+var LOCKER_HIDE_SPOTS = [
+  { id:'guard_locker',    room:'guard_shack', x:-4.5, z:-4.5, y:1.0, exitX:-2.8, exitZ:-4.5, label:'LOCKER' },
+  { id:'workshop_locker', room:'workshop',    x: 8.7, z: 6.4, y:1.0, exitX: 7.0, exitZ: 6.4, label:'LOCKER' },
+];
+
 var PISTOL_AMMO_ITEMS = [
   { id:'pammo_cafeteria', spot:'cafeteria',   x: 6.0, z:-5.5, y:0.90, amount:20, label:'PISTOL BULLETS' },
   { id:'pammo_farmhouse', spot:'farmhouse',   x:-3.0, z: 2.5, y:0.90, amount:20, label:'PISTOL BULLETS' },
@@ -298,6 +311,7 @@ function buildRoom() {
   buildAmmoItems();
   buildGasCans();
   buildBatteryItems();
+  buildHideSpots();
   updateEnemyCount();
 
   // Pacifist talk-down prompt
@@ -318,6 +332,25 @@ function buildVentAccess(){
     scene.add(makeBox(0.22,0.02,1.0,0x888888, vent.roomX + slat*0.30, 0.12, vent.roomZ));
   }
   addLabel(crouching ? 'F = ENTER VENT' : 'CROUCH + F = ENTER VENT', vent.roomX, 1.1, vent.roomZ, '#88ddff');
+}
+
+function buildHideSpots(){
+  TABLE_HIDE_SPOTS.forEach(function(spot){
+    if(spot.room!==currentSpot) return;
+    addLabel(crouching ? 'F = HIDE UNDER ' + spot.label : 'CROUCH + F = HIDE', spot.x, 1.1, spot.z, '#99ffaa');
+  });
+
+  LOCKER_HIDE_SPOTS.forEach(function(spot){
+    if(spot.room!==currentSpot) return;
+    if(spot.id==='workshop_locker'){
+      scene.add(makeBox(1.2,2.4,0.7,0x3a4654, spot.x,1.2,spot.z));
+      scene.add(makeBox(0.56,2.26,0.05,0x526274, spot.x-.30,1.2,spot.z+.33));
+      scene.add(makeBox(0.56,2.26,0.05,0x526274, spot.x+.30,1.2,spot.z+.33));
+      scene.add(makeBox(0.06,0.10,0.04,0xd4b36a, spot.x-.18,1.2,spot.z+.36));
+      scene.add(makeBox(0.06,0.10,0.04,0xd4b36a, spot.x+.18,1.2,spot.z+.36));
+    }
+    addLabel('F = HIDE IN ' + spot.label, spot.x, 2.0, spot.z, '#88ddff');
+  });
 }
 
 
@@ -2787,7 +2820,58 @@ function overlapsSolidRect(px, pz, solid){
          Math.abs(pz - solid.z) < (solid.hd + PLAYER_COLLISION_RADIUS);
 }
 
+function isPlayerHidden(){
+  return !!hiddenType;
+}
+
+function clearHideState(exitMsg){
+  if(!hiddenType || !hiddenAnchor) return;
+  var anchor = hiddenAnchor;
+  hiddenType = null;
+  hiddenSpotId = null;
+  hiddenAnchor = null;
+  if(anchor.exitX !== undefined && anchor.exitZ !== undefined){
+    playerPos.x = anchor.exitX;
+    playerPos.z = anchor.exitZ;
+  }
+  if(exitMsg) showMsg(exitMsg, 1800);
+}
+
+function findNearbyTableHideSpot(){
+  for(var i=0;i<TABLE_HIDE_SPOTS.length;i++){
+    var spot = TABLE_HIDE_SPOTS[i];
+    if(spot.room!==currentSpot) continue;
+    var dx = spot.x-playerPos.x, dz = spot.z-playerPos.z;
+    if(Math.sqrt(dx*dx+dz*dz) < 2.3) return spot;
+  }
+  return null;
+}
+
+function findNearbyLockerHideSpot(){
+  for(var i=0;i<LOCKER_HIDE_SPOTS.length;i++){
+    var spot = LOCKER_HIDE_SPOTS[i];
+    if(spot.room!==currentSpot) continue;
+    var dx = spot.x-playerPos.x, dz = spot.z-playerPos.z;
+    if(Math.sqrt(dx*dx+dz*dz) < 2.4) return spot;
+  }
+  return null;
+}
+
+function enterHideSpot(type, spot){
+  hiddenType = type;
+  hiddenSpotId = spot.id;
+  hiddenAnchor = spot;
+  crouching = (type==='table');
+  playerPos.x = spot.x;
+  playerPos.z = spot.z;
+  jumpOffset = 0;
+  jumpVelocity = 0;
+  jumping = false;
+  showMsg(type==='table' ? 'You hide under the table.' : 'You slip into the locker and hold still.', 2200);
+}
+
 function clampPlayerAgainstRoomSolids(prevX, prevZ){
+  if(hiddenType) return;
   var solids = ROOM_SOLIDS[currentSpot] || [];
   if(!solids.length) return;
 
@@ -2857,6 +2941,9 @@ function getDoorPromptText(){
 
 function navigate(room, fromWall){
   if(gameOver||win) return;
+  hiddenType = null;
+  hiddenSpotId = null;
+  hiddenAnchor = null;
   var prevSpot=currentSpot;
   currentSpot=room;
 
@@ -2899,6 +2986,9 @@ function navigate(room, fromWall){
 
 function setRoomByVent(room, x, z, yaw){
   if(gameOver||win) return;
+  hiddenType = null;
+  hiddenSpotId = null;
+  hiddenAnchor = null;
   currentSpot = room;
   playerPos.set(x, crouching ? 0.85 : 1.6, z);
   camera.position.copy(playerPos);
@@ -2964,6 +3054,27 @@ function triggerFarmerPhase3(){
 
 function doInteract(){
   if(!gameStarted||gameOver||win||cutscenePlaying) return;
+
+  if(hiddenType){
+    clearHideState(hiddenType==='table' ? 'You crawl out from under the table.' : 'You quietly step out of the locker.');
+    return;
+  }
+
+  var nearbyLocker = findNearbyLockerHideSpot();
+  if(nearbyLocker){
+    enterHideSpot('locker', nearbyLocker);
+    return;
+  }
+
+  var nearbyTable = findNearbyTableHideSpot();
+  if(nearbyTable){
+    if(!crouching){
+      showMsg('Crouch first to hide under the table.', 1800);
+      return;
+    }
+    enterHideSpot('table', nearbyTable);
+    return;
+  }
 
   if(tryVentTravel()) return;
 
@@ -3423,6 +3534,7 @@ function animate(){
   var forward=new THREE.Vector3(-Math.sin(camYaw),0,-Math.cos(camYaw));
   var right  =new THREE.Vector3( Math.cos(camYaw),0,-Math.sin(camYaw));
   var isMoving=keys['KeyW']||keys['KeyS']||keys['KeyQ']||keys['KeyE'];
+  if(hiddenType) isMoving = false;
   var prevX = playerPos.x;
   var prevZ = playerPos.z;
   // Castle interior requires crouching
@@ -3440,10 +3552,17 @@ function animate(){
   }
   clampPlayerAgainstRoomSolids(prevX, prevZ);
   var groundY = crouching ? 0.85 : 1.6;
+  if(hiddenType && hiddenAnchor){
+    playerPos.x = hiddenAnchor.x;
+    playerPos.z = hiddenAnchor.z;
+  }
   if(crouching && jumping){
     jumping = false;
     jumpVelocity = 0;
     jumpOffset = 0;
+  }
+  if(hiddenType==='table' && !crouching){
+    clearHideState('You crawl out from under the table.');
   }
   if(jumping){
     jumpOffset += jumpVelocity * dt;
@@ -3585,6 +3704,7 @@ function animate(){
   if(needRebuild) buildRoom();
 
   // ── BOT ROAMING — step one room at a time, no teleporting ─────────────────
+  var playerHiddenNow = isPlayerHidden();
   for(var rk in bots){
     var rb=bots[rk];
     if(!rb.alive||rb.name==='FARMER'||rb.name==='FARM DOG') continue;
@@ -3604,7 +3724,11 @@ function animate(){
     var isStalker=(rb.name==='WOLF'||rb.name==='FOX');
     var stalkerPath=findRoomPath(rb.spot,currentSpot);
 
-    if(isStalker){
+    if(playerHiddenNow){
+      var hiddenAdj = (ROOM_ADJACENCY[rb.spot]||[]).filter(function(r){ return r!==currentSpot; });
+      if(hiddenAdj.length) nextRoom = hiddenAdj[Math.floor(Math.random()*hiddenAdj.length)];
+      else nextRoom = rb.spot;
+    } else if(isStalker){
       if(stalkerPath.length===2){
         // ── Adjacent to player — stalk/lurk behaviour ───────────────────
         // 15% chance to finally strike; otherwise drift or hold position
@@ -3700,9 +3824,11 @@ function animate(){
 
   // ── ENEMY AI ───────────────────────────────────────────────────────────────
   var T=Date.now()*.001;
+  var playerHidden = isPlayerHidden();
   for(var ek in enemyMeshes){
     var em=enemyMeshes[ek],ebot=bots[ek];
     if(!ebot||!ebot.alive||ebot.name==='FARM DOG') continue;
+    if(playerHidden) continue;
     var ex=camera.position.x-em.position.x,ez=camera.position.z-em.position.z;
     var dist=Math.sqrt(ex*ex+ez*ez);
     // Stun: freeze movement and flash blue

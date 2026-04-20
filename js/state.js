@@ -73,6 +73,9 @@ var crouching;
 var jumpVelocity;
 var jumpOffset;
 var jumping;
+var hiddenType;
+var hiddenSpotId;
+var hiddenAnchor;
 
 function resetRuntimeState(){
   gameStarted = false;
@@ -148,4 +151,7 @@ function resetRuntimeState(){
   jumpVelocity = 0;
   jumpOffset = 0;
   jumping = false;
+  hiddenType = null;
+  hiddenSpotId = null;
+  hiddenAnchor = null;
 }
