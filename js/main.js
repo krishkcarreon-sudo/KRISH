@@ -2854,9 +2854,11 @@ function isPlayerHidden(){
 function clearHideState(exitMsg){
   if(!hiddenType || !hiddenAnchor) return;
   var anchor = hiddenAnchor;
+  var wasTableHide = (hiddenType === 'table');
   hiddenType = null;
   hiddenSpotId = null;
   hiddenAnchor = null;
+  if(wasTableHide) crouching = false;
   if(anchor.exitX !== undefined && anchor.exitZ !== undefined){
     playerPos.x = anchor.exitX;
     playerPos.z = anchor.exitZ;
@@ -3559,8 +3561,9 @@ function animate(){
   if(keys['ArrowDown']) camPitch=Math.max(-.65,Math.min(.65,camPitch-pitchSpeed));
 
   // ── MOVEMENT (WASD + Q/E strafe) ───────────────────────────────────────────
+  var crouchActive = crouching || hiddenType==='table';
   var baseSpeed = currentSpot==='vents' ? VENT_MOVE_SPEED : MOVE_SPEED;
-  var speed=(crouching ? baseSpeed*0.45 : baseSpeed)*dt;
+  var speed=(crouchActive ? baseSpeed*0.45 : baseSpeed)*dt;
   var forward=new THREE.Vector3(-Math.sin(camYaw),0,-Math.cos(camYaw));
   var right  =new THREE.Vector3( Math.cos(camYaw),0,-Math.sin(camYaw));
   var isMoving=keys['KeyW']||keys['KeyS']||keys['KeyQ']||keys['KeyE'];
@@ -3568,10 +3571,10 @@ function animate(){
   var prevX = playerPos.x;
   var prevZ = playerPos.z;
   // Castle interior requires crouching
-  if(currentSpot==='play_place'&&playerInCastle()&&!crouching&&isMoving){
+  if(currentSpot==='play_place'&&playerInCastle()&&!crouchActive&&isMoving){
     showMsg('CROUCH [Space] — the castle is too low to stand in!',1200);
     isMoving=false;
-  } else if(currentSpot==='vents'&&!crouching&&isMoving){
+  } else if(currentSpot==='vents'&&!crouchActive&&isMoving){
     showMsg('CROUCH [Space] — the vents are too tight to stand in!',1200);
     isMoving=false;
   } else {
@@ -3581,7 +3584,7 @@ function animate(){
     if(keys['KeyE']) playerPos.addScaledVector(right,   speed);
   }
   clampPlayerAgainstRoomSolids(prevX, prevZ);
-  var groundY = crouching ? 0.85 : 1.6;
+  var groundY = crouchActive ? 0.85 : 1.6;
   if(hiddenType && hiddenAnchor){
     playerPos.x = hiddenAnchor.x;
     playerPos.z = hiddenAnchor.z;
@@ -3590,9 +3593,6 @@ function animate(){
     jumping = false;
     jumpVelocity = 0;
     jumpOffset = 0;
-  }
-  if(hiddenType==='table' && !crouching){
-    clearHideState('You crawl out from under the table.');
   }
   if(jumping){
     jumpOffset += jumpVelocity * dt;
