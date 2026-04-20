@@ -76,6 +76,7 @@ var jumping;
 var hiddenType;
 var hiddenSpotId;
 var hiddenAnchor;
+var doorTransitionCooldown;
 
 function resetRuntimeState(){
   gameStarted = false;
@@ -154,4 +155,5 @@ function resetRuntimeState(){
   hiddenType = null;
   hiddenSpotId = null;
   hiddenAnchor = null;
+  doorTransitionCooldown = 0;
 }

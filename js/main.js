@@ -2789,6 +2789,7 @@ function getDoorAt(wall, pos){
 }
 
 function clampPlayerWithDoors(){
+  if(doorTransitionCooldown > 0) return false;
   var WALL_STOP=9.2, WALL_TRANSIT=ROOM_HALF+.8;
   // X boundaries
   if(playerPos.x<-WALL_STOP){
@@ -2954,7 +2955,7 @@ function navigate(room, fromWall){
   var matchDoor=entryDoors.filter(function(d){return d.dest===prevSpot;})[0]||entryDoors[0];
   var entryCenter=matchDoor?matchDoor.center:0;
 
-  var offset=2.8;
+  var offset=3.8;
   var ep={x:0,z:0};
   if(entryWall==='N'){ep.z=-(ROOM_HALF-offset);ep.x=entryCenter;}
   else if(entryWall==='S'){ep.z= (ROOM_HALF-offset);ep.x=entryCenter;}
@@ -2963,6 +2964,7 @@ function navigate(room, fromWall){
 
   playerPos.set(ep.x,1.6,ep.z);
   camera.position.copy(playerPos);
+  doorTransitionCooldown = 0.28;
 
   // Face inward
   if(entryWall==='N')      camYaw=0;
@@ -2992,6 +2994,7 @@ function setRoomByVent(room, x, z, yaw){
   currentSpot = room;
   playerPos.set(x, crouching ? 0.85 : 1.6, z);
   camera.position.copy(playerPos);
+  doorTransitionCooldown = 0.18;
   camYaw = yaw || 0;
   camPitch = 0;
   buildRoom();
@@ -3514,6 +3517,7 @@ function animate(){
 
   var dt=clock.getDelta();
   if(dt>0.1) dt=0.1; // cap to prevent tunneling
+  if(doorTransitionCooldown > 0) doorTransitionCooldown = Math.max(0, doorTransitionCooldown - dt);
 
   // ── CAMERA LOOK ────────────────────────────────────────────────────────────
   camera.rotation.order='YXZ';
