@@ -10,6 +10,58 @@ const MAX_HP         = 250;
 const TICKS_PER_HOUR = 10800;  // 3 real minutes per in-game hour
 const GAS_CAN_POWER  = 35;
 const VENT_MOVE_SPEED = 3.4;
+const PLAYER_COLLISION_RADIUS = 0.48;
+
+var ROOM_SOLIDS = {
+  cafeteria: [
+    {x:-0.2, z:-7.5, hw:3.3, hd:0.9},
+    {x:-4.0, z:-3.0, hw:1.8, hd:1.0},
+    {x: 0.0, z:-3.0, hw:1.8, hd:1.0},
+    {x: 4.0, z:-3.0, hw:1.8, hd:1.0},
+    {x:-4.0, z: 1.5, hw:1.8, hd:1.0},
+    {x: 0.0, z: 1.5, hw:1.8, hd:1.0},
+    {x: 4.0, z: 1.5, hw:1.8, hd:1.0},
+  ],
+  guard_shack: [
+    {x: 0.0, z:-3.5, hw:2.1, hd:1.0},
+    {x:-4.5, z:-4.5, hw:0.7, hd:1.0},
+  ],
+  farmhouse: [
+    {x: 0.0, z:-4.5, hw:1.9, hd:1.0},
+    {x: 0.0, z:-10.8, hw:1.5, hd:0.8},
+    {x:-9.9, z:-4.0, hw:0.6, hd:2.2},
+    {x:-5.5, z: 3.5, hw:2.0, hd:0.9},
+  ],
+  kitchen: [
+    {x: 0.0, z:-7.5, hw:5.4, hd:0.9},
+    {x: 6.6, z:-7.5, hw:1.3, hd:0.9},
+    {x:-8.0, z:-6.9, hw:1.2, hd:1.0},
+    {x: 0.0, z:-1.5, hw:2.1, hd:1.2},
+    {x: 7.0, z: 4.3, hw:1.3, hd:1.0},
+  ],
+  workshop: [
+    {x:-1.0, z:-7.5, hw:3.8, hd:1.0},
+    {x: 9.5, z: 0.0, hw:1.0, hd:2.8},
+    {x: 2.0, z: 2.0, hw:2.0, hd:1.2},
+  ],
+  generator_room: [
+    {x: 0.0, z:-6.0, hw:1.9, hd:1.1},
+    {x:-7.0, z:-8.0, hw:1.8, hd:0.9},
+  ],
+  arcade: [
+    {x:-10.2, z:-5.0, hw:0.9, hd:1.5},
+    {x:-10.2, z: 0.0, hw:0.9, hd:1.5},
+    {x:-10.2, z: 5.0, hw:0.9, hd:1.5},
+    {x: 10.2, z:-5.0, hw:0.9, hd:1.5},
+    {x: 10.2, z: 0.0, hw:0.9, hd:1.5},
+    {x: 10.2, z: 5.0, hw:0.9, hd:1.5},
+    {x: 0.0,  z:-10.45, hw:8.3, hd:1.1},
+    {x: 0.0,  z: 2.0,    hw:0.8, hd:0.8},
+  ],
+  restrooms: [
+    {x: 0.0, z:10.5, hw:4.3, hd:0.9},
+  ],
+};
 
 var VENT_LINKS = {
   cafeteria:     { roomX:-8.0, roomZ: 7.6, ventX:-8.0, ventZ: 8.0, label:'CAFETERIA' },
@@ -245,6 +297,7 @@ function buildRoom() {
   buildKitchenIngredients();
   buildAmmoItems();
   buildGasCans();
+  buildBatteryItems();
   updateEnemyCount();
 
   // Pacifist talk-down prompt
@@ -2300,6 +2353,19 @@ function buildGasCans(){
   });
 }
 
+function buildBatteryItems(){
+  BATTERY_ITEMS.forEach(function(item){
+    if(item.spot!==currentSpot) return;
+    if(!activeBatteryIds.has(item.id) || collectedBatteryIds.has(item.id)) return;
+    scene.add(makeBox(.28,.34,.18,0x2255cc,item.x,item.y,item.z));
+    scene.add(makeBox(.24,.06,.14,0x88bbff,item.x,item.y+.20,item.z));
+    scene.add(makeBox(.10,.05,.06,0xd4b36a,item.x-0.06,item.y+.24,item.z));
+    scene.add(makeBox(.10,.05,.06,0xd4b36a,item.x+0.06,item.y+.24,item.z));
+    scene.add(makeBox(.30,.02,.20,0x112244,item.x,item.y-.17,item.z));
+    addLabel('F = BATTERIES  FULL POWER', item.x, item.y+.82, item.z, '#88bbff');
+  });
+}
+
 
 function buildEnemies(){
   for(var key in bots){
@@ -2716,6 +2782,34 @@ function clampPlayerWithDoors(){
   return false;
 }
 
+function overlapsSolidRect(px, pz, solid){
+  return Math.abs(px - solid.x) < (solid.hw + PLAYER_COLLISION_RADIUS) &&
+         Math.abs(pz - solid.z) < (solid.hd + PLAYER_COLLISION_RADIUS);
+}
+
+function clampPlayerAgainstRoomSolids(prevX, prevZ){
+  var solids = ROOM_SOLIDS[currentSpot] || [];
+  if(!solids.length) return;
+
+  for(var i=0;i<solids.length;i++){
+    var solid = solids[i];
+    if(!overlapsSolidRect(playerPos.x, playerPos.z, solid)) continue;
+
+    // Try resolving one axis at a time so sliding along furniture still feels natural.
+    var canKeepX = !overlapsSolidRect(playerPos.x, prevZ, solid);
+    var canKeepZ = !overlapsSolidRect(prevX, playerPos.z, solid);
+
+    if(canKeepX && !canKeepZ){
+      playerPos.z = prevZ;
+    } else if(!canKeepX && canKeepZ){
+      playerPos.x = prevX;
+    } else {
+      playerPos.x = prevX;
+      playerPos.z = prevZ;
+    }
+  }
+}
+
 function getDoorPromptText(){
   var NEAR=2.5; // distance from wall to show prompt
   var checks=[
@@ -3081,6 +3175,27 @@ function doInteract(){
     }
   }
 
+  // Battery pickup
+  for(var bi=0;bi<BATTERY_ITEMS.length;bi++){
+    var battery=BATTERY_ITEMS[bi];
+    if(battery.spot!==currentSpot) continue;
+    if(!activeBatteryIds.has(battery.id) || collectedBatteryIds.has(battery.id)) continue;
+    var bdx=battery.x-playerPos.x, bdz=battery.z-playerPos.z;
+    if(Math.sqrt(bdx*bdx+bdz*bdz)<2.6){
+      collectedBatteryIds.add(battery.id);
+      power=100;
+      if(ambLight && roomLight){
+        ambLight.intensity=0.28;
+        roomLight.intensity=1.6;
+      }
+      document.body.classList.remove('power-dead');
+      document.getElementById('power-warning').style.display='none';
+      showMsg('🔋 Batteries found! Flashlight power restored to 100%!', 3200);
+      updateResourceHUD();
+      buildRoom(); return;
+    }
+  }
+
   // Generator refuel (generator room, fuel intake port at x=1.72, z=-6)
   if(currentSpot==='generator_room' && gasCansHeld>0){
     var grdx=1.72-playerPos.x, grdz=-6.0-playerPos.z;
@@ -3231,6 +3346,14 @@ function init(){
     gasPool[swapIndex]=temp;
   }
   gasPool.slice(0,4).forEach(function(item){ activeGasCanIds.add(item.id); });
+  var batteryPool=BATTERY_ITEMS.slice();
+  for(var bp=batteryPool.length-1;bp>0;bp--){
+    var batterySwapIndex=Math.floor(Math.random()*(bp+1));
+    var batteryTemp=batteryPool[bp];
+    batteryPool[bp]=batteryPool[batterySwapIndex];
+    batteryPool[batterySwapIndex]=batteryTemp;
+  }
+  batteryPool.slice(0,4).forEach(function(item){ activeBatteryIds.add(item.id); });
 
   buildRoom();
   buildWeapon();
@@ -3274,6 +3397,8 @@ function animate(){
   var forward=new THREE.Vector3(-Math.sin(camYaw),0,-Math.cos(camYaw));
   var right  =new THREE.Vector3( Math.cos(camYaw),0,-Math.sin(camYaw));
   var isMoving=keys['KeyW']||keys['KeyS']||keys['KeyQ']||keys['KeyE'];
+  var prevX = playerPos.x;
+  var prevZ = playerPos.z;
   // Castle interior requires crouching
   if(currentSpot==='play_place'&&playerInCastle()&&!crouching&&isMoving){
     showMsg('CROUCH [Space] — the castle is too low to stand in!',1200);
@@ -3287,6 +3412,7 @@ function animate(){
     if(keys['KeyQ']) playerPos.addScaledVector(right,  -speed);
     if(keys['KeyE']) playerPos.addScaledVector(right,   speed);
   }
+  clampPlayerAgainstRoomSolids(prevX, prevZ);
   var groundY = crouching ? 0.85 : 1.6;
   if(crouching && jumping){
     jumping = false;

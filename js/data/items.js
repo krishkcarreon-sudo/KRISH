@@ -48,3 +48,12 @@ const GAS_CAN_ITEMS = [
   { id:'gas_farmhouse', spot:'farmhouse',    x: 6.8, z: 2.8, y:0.22, label:'GAS CAN' },
   { id:'gas_workshop',  spot:'workshop',     x:-7.8, z: 6.5, y:0.22, label:'GAS CAN' },
 ];
+
+const BATTERY_ITEMS = [
+  { id:'bat_guard',     spot:'guard_shack',  x: 3.6, z:-3.8, y:0.90, label:'BATTERIES' },
+  { id:'bat_restroom',  spot:'restrooms',    x:-6.6, z:-3.8, y:0.92, label:'BATTERIES' },
+  { id:'bat_closet',    spot:'closet',       x: 5.8, z: 1.8, y:0.90, label:'BATTERIES' },
+  { id:'bat_farmhouse', spot:'farmhouse',    x:-5.8, z: 3.0, y:0.90, label:'BATTERIES' },
+  { id:'bat_arcade',    spot:'arcade',       x: 6.0, z: 5.8, y:0.04, label:'BATTERIES' },
+  { id:'bat_workshop',  spot:'workshop',     x: 6.4, z:-5.8, y:0.92, label:'BATTERIES' },
+];

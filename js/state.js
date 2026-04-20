@@ -60,6 +60,8 @@ var placedTraps;
 var gasCansHeld;
 var collectedGasCans;
 var activeGasCanIds;
+var collectedBatteryIds;
+var activeBatteryIds;
 var flickerTimer;
 var flickerState;
 var ambLight;
@@ -133,6 +135,8 @@ function resetRuntimeState(){
   gasCansHeld = 0;
   collectedGasCans = new Set();
   activeGasCanIds = new Set();
+  collectedBatteryIds = new Set();
+  activeBatteryIds = new Set();
   flickerTimer = 0;
   flickerState = 1.0;
   ambLight = null;
