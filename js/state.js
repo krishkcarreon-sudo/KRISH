@@ -5,6 +5,7 @@
 var scene, camera, renderer, clock;
 var gameStarted, gameOver, win;
 var playerHp;
+var hunger;
 var power;
 var weapon;
 var ownedWeapons;
@@ -77,12 +78,16 @@ var hiddenType;
 var hiddenSpotId;
 var hiddenAnchor;
 var doorTransitionCooldown;
+var hungerDrainTimer;
+var starvationTimer;
+var collectedMedkits;
 
 function resetRuntimeState(){
   gameStarted = false;
   gameOver = false;
   win = false;
   playerHp = MAX_HP;
+  hunger = 100;
   power = 100;
   weapon = 'none';
   ownedWeapons = new Set(['none']);
@@ -156,4 +161,7 @@ function resetRuntimeState(){
   hiddenSpotId = null;
   hiddenAnchor = null;
   doorTransitionCooldown = 0;
+  hungerDrainTimer = 0;
+  starvationTimer = 0;
+  collectedMedkits = new Set();
 }

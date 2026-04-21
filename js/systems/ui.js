@@ -12,9 +12,16 @@ function updateResourceHUD(){
   var ammoEl = document.getElementById('ammo-label');
   var gasCanEl = document.getElementById('gascans-label');
   var ingredientEl = document.getElementById('ingredients-label');
+  var hungerNumEl = document.getElementById('hunger-num');
+  var hungerFillEl = document.getElementById('hunger-fill');
   if(ammoEl) ammoEl.textContent = 'Ammo: ' + shotgunAmmo;
   if(gasCanEl) gasCanEl.textContent = 'Gas Cans: ' + gasCansHeld;
   if(ingredientEl) ingredientEl.textContent = 'Ingredients: ' + kitchenIngredients.length;
+  if(hungerNumEl) hungerNumEl.textContent = Math.max(0, Math.floor(hunger));
+  if(hungerFillEl){
+    hungerFillEl.style.width = Math.max(0, hunger) + '%';
+    hungerFillEl.style.background = hunger < 20 ? '#d84a3a' : (hunger < 45 ? '#d8a43a' : '#e0b644');
+  }
 }
 
 function showMsg(text, duration){

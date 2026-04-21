@@ -57,3 +57,7 @@ const BATTERY_ITEMS = [
   { id:'bat_arcade',    spot:'arcade',       x: 6.0, z: 5.8, y:0.04, label:'BATTERIES' },
   { id:'bat_workshop',  spot:'workshop',     x: 6.4, z:-5.8, y:0.92, label:'BATTERIES' },
 ];
+
+const MED_KIT_ITEMS = [
+  { id:'med_guard', spot:'guard_shack', x:-0.9, z:-3.3, y:0.98, label:'MED KIT' },
+];

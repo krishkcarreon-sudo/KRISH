@@ -11,6 +11,11 @@ const TICKS_PER_HOUR = 10800;  // 3 real minutes per in-game hour
 const GAS_CAN_POWER  = 35;
 const VENT_MOVE_SPEED = 3.4;
 const PLAYER_COLLISION_RADIUS = 0.48;
+const FOOD_HUNGER_GAIN = 15;
+const HUNGER_DRAIN_INTERVAL = 12.0;
+const STARVATION_DAMAGE_INTERVAL = 3.0;
+const STARVATION_DAMAGE_AMOUNT = MAX_HP * 0.01;
+const MED_KIT_RESPAWN_MS = 60000;
 
 var ROOM_SOLIDS = {
   cafeteria: [
@@ -311,6 +316,7 @@ function buildRoom() {
   buildAmmoItems();
   buildGasCans();
   buildBatteryItems();
+  buildMedkits();
   buildHideSpots();
   buildDoorLeadLabels();
   updateEnemyCount();
@@ -2330,7 +2336,7 @@ function buildFoodItems(){
     }
 
     // Floating pickup label above item
-    addLabel('F = '+item.label+'  +'+item.heal+' HP', x, b+1.05, z, '#88ff44');
+    addLabel('F = '+item.label+'  +'+FOOD_HUNGER_GAIN+'% HUNGER', x, b+1.05, z, '#88ff44');
   });
 }
 
@@ -2422,6 +2428,16 @@ function buildBatteryItems(){
     scene.add(makeBox(.10,.05,.06,0xd4b36a,item.x+0.06,item.y+.24,item.z));
     scene.add(makeBox(.30,.02,.20,0x112244,item.x,item.y-.17,item.z));
     addLabel('F = BATTERIES  FULL POWER', item.x, item.y+.82, item.z, '#88bbff');
+  });
+}
+
+function buildMedkits(){
+  MED_KIT_ITEMS.forEach(function(item){
+    if(item.spot!==currentSpot || collectedMedkits.has(item.id)) return;
+    scene.add(makeBox(.42,.14,.26,0xf0f0f0,item.x,item.y,item.z));
+    scene.add(makeBox(.18,.04,.08,0xdd3333,item.x,item.y+.08,item.z));
+    scene.add(makeBox(.08,.04,.18,0xdd3333,item.x,item.y+.08,item.z));
+    addLabel('F = MED KIT  FULL HEAL', item.x, item.y+.82, item.z, '#ff8888');
   });
 }
 
@@ -3204,11 +3220,11 @@ function doInteract(){
       if(kitchenIngredients.length>=2){
         var usedA=kitchenIngredients.shift();
         var usedB=kitchenIngredients.shift();
-        var beforeMealHp=playerHp;
+        var beforeMealHunger=hunger;
         cookedMeals++;
-        playerHp=Math.min(MAX_HP, playerHp+400);
+        hunger=Math.min(100, hunger+FOOD_HUNGER_GAIN);
         updateResourceHUD();
-        showMsg('Cooked a meal with '+usedA+' + '+usedB+'! +' + Math.floor(playerHp-beforeMealHp) + ' HP', 3200);
+        showMsg('Cooked a meal with '+usedA+' + '+usedB+'! +' + Math.floor(hunger-beforeMealHunger) + '% hunger', 3200);
       } else {
         showMsg('Find 2 ingredients first, then cook at the stove.', 2400);
       }
@@ -3302,6 +3318,20 @@ function doInteract(){
     }
   }
 
+  // Med kit pickup
+  for(var mi=0;mi<MED_KIT_ITEMS.length;mi++){
+    var medkit=MED_KIT_ITEMS[mi];
+    if(medkit.spot!==currentSpot||collectedMedkits.has(medkit.id)) continue;
+    var mdx=medkit.x-playerPos.x, mdz=medkit.z-playerPos.z;
+    if(Math.sqrt(mdx*mdx+mdz*mdz)<2.5){
+      collectedMedkits.add(medkit.id);
+      respawnTimers[medkit.id] = Date.now() + MED_KIT_RESPAWN_MS;
+      playerHp = MAX_HP;
+      showMsg('Med kit used! Health fully restored.', 2600);
+      buildRoom(); return;
+    }
+  }
+
   // Pistol pickup (cage room, on crate at 0, y, 8.5)
   if(currentSpot==='cage'&&!ownedWeapons.has('pistol')){
     var pgdx=0-playerPos.x, pgdz=8.5-playerPos.z;
@@ -3321,10 +3351,11 @@ function doInteract(){
     var fdx=food.x-playerPos.x, fdz=food.z-playerPos.z;
     if(Math.sqrt(fdx*fdx+fdz*fdz)<2.6){
       collectedFood.add(food.id);
-      var preHp=playerHp;
-      playerHp=Math.min(MAX_HP,playerHp+food.heal);
-      var gained=Math.floor(playerHp-preHp);
-      showMsg(food.label+' consumed! +'+gained+' HP \u2665',2800);
+      var preHunger=hunger;
+      hunger=Math.min(100,hunger+FOOD_HUNGER_GAIN);
+      var gained=Math.floor(hunger-preHunger);
+      updateResourceHUD();
+      showMsg(food.label+' consumed! +'+gained+'% hunger',2800);
       buildRoom(); return;
     }
   }
@@ -3621,7 +3652,7 @@ function animate(){
   }
 
   // ── DOOR PROMPT ────────────────────────────────────────────────────────────
-  var dp=getDoorPromptText();
+  var dp = hiddenType ? 'Press F to unhide' : getDoorPromptText();
   var dpEl=document.getElementById('door-prompt');
   if(dp){dpEl.textContent=dp;dpEl.className='door-prompt show';}
   else dpEl.className='door-prompt';
@@ -3725,6 +3756,11 @@ function animate(){
         collectedIngredients.delete(rtid);
         for(var ri2=0;ri2<KITCHEN_INGREDIENTS.length;ri2++){
           if(KITCHEN_INGREDIENTS[ri2].id===rtid && KITCHEN_INGREDIENTS[ri2].spot===currentSpot){ wasInRoom=true; break; }
+        }
+      } else if(collectedMedkits.has(rtid)){
+        collectedMedkits.delete(rtid);
+        for(var ri3=0;ri3<MED_KIT_ITEMS.length;ri3++){
+          if(MED_KIT_ITEMS[ri3].id===rtid && MED_KIT_ITEMS[ri3].spot===currentSpot){ wasInRoom=true; break; }
         }
       }
       delete respawnTimers[rtid];
@@ -4103,6 +4139,23 @@ function animate(){
     document.getElementById('boss-fill').style.width=((bots.purple.hp/bots.purple.maxHp)*100)+'%';
   } else {
     document.getElementById('boss-bar').style.display='none';
+  }
+
+  // Hunger slowly drains over time. If it hits zero, starvation damages HP.
+  hungerDrainTimer += dt;
+  while(hungerDrainTimer >= HUNGER_DRAIN_INTERVAL){
+    hungerDrainTimer -= HUNGER_DRAIN_INTERVAL;
+    hunger = Math.max(0, hunger - 1);
+  }
+  if(hunger <= 0){
+    starvationTimer += dt;
+    while(starvationTimer >= STARVATION_DAMAGE_INTERVAL){
+      starvationTimer -= STARVATION_DAMAGE_INTERVAL;
+      playerHp = Math.max(0, playerHp - STARVATION_DAMAGE_AMOUNT);
+      lastDamageSource = 'STARVATION';
+    }
+  } else {
+    starvationTimer = 0;
   }
 
   // ── PLAYER HP ──────────────────────────────────────────────────────────────
