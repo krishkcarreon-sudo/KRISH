@@ -30,14 +30,10 @@ const KITCHEN_INGREDIENTS = [
 
 
 const AMMO_ITEMS = [
-  { id:'ammo_silo',      spot:'silo',         x:-5.6, z:-3.0, y:0.26, amount:10, label:'SHOTGUN SHELLS' },
-  { id:'ammo_shed',      spot:'tractor_shed', x:-5.1, z:-4.9, y:1.08, amount:10, label:'SHOTGUN SHELLS' },
-  { id:'ammo_workshop',  spot:'workshop',     x: 8.8, z: 1.9, y:1.08, amount:10, label:'SHOTGUN SHELLS' },
-  { id:'ammo_barn',      spot:'barn',         x: 6.2, z:-6.5, y:0.10, amount:10, label:'SHOTGUN SHELLS' },
-  { id:'ammo_cellar',    spot:'cellar',       x:-5.0, z:-2.6, y:0.92, amount:10, label:'SHOTGUN SHELLS' },
-  { id:'ammo_pasture',   spot:'pasture',      x: 6.6, z:-5.8, y:0.10, amount:10, label:'SHOTGUN SHELLS' },
-  { id:'ammo_restroom',  spot:'restrooms',    x:-7.4, z:-4.0, y:0.92, amount:10, label:'SHOTGUN SHELLS' },
-  { id:'ammo_kitchen',   spot:'kitchen',      x: 7.2, z:-6.8, y:1.02, amount:10, label:'SHOTGUN SHELLS' },
+  { id:'ammo_silo',      spot:'silo',         x:-5.6, z:-3.0, y:0.26, amount:6, label:'SHOTGUN SHELLS' },
+  { id:'ammo_workshop',  spot:'workshop',     x: 8.8, z: 1.9, y:1.08, amount:6, label:'SHOTGUN SHELLS' },
+  { id:'ammo_cellar',    spot:'cellar',       x:-5.0, z:-2.6, y:0.92, amount:6, label:'SHOTGUN SHELLS' },
+  { id:'ammo_kitchen',   spot:'kitchen',      x: 7.2, z:-6.8, y:1.02, amount:6, label:'SHOTGUN SHELLS' },
 ];
 
 const GAS_CAN_ITEMS = [
@@ -59,5 +55,5 @@ const BATTERY_ITEMS = [
 ];
 
 const MED_KIT_ITEMS = [
-  { id:'med_guard', spot:'guard_shack', x:-0.9, z:-3.3, y:0.98, label:'MED KIT' },
+  { id:'med_guard', spot:'guard_shack', x:-7.2, z:6.8, y:0.10, label:'MED KIT' },
 ];

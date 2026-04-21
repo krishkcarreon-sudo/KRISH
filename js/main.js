@@ -16,6 +16,8 @@ const HUNGER_DRAIN_INTERVAL = 12.0;
 const STARVATION_DAMAGE_INTERVAL = 3.0;
 const STARVATION_DAMAGE_AMOUNT = MAX_HP * 0.01;
 const MED_KIT_RESPAWN_MS = 60000;
+const SHOTGUN_AMMO_RESPAWN_MS = 90000;
+const PISTOL_AMMO_RESPAWN_MS = 60000;
 
 var ROOM_SOLIDS = {
   cafeteria: [
@@ -3086,8 +3088,8 @@ function tryVentTravel(){
 function triggerFarmerPhase3(){
   farmerPhase = 3;
   bots.purple.alive = true;
-  bots.purple.hp    = 900;
-  bots.purple.maxHp = 900;
+  bots.purple.hp    = 2700;
+  bots.purple.maxHp = 2700;
   bots.purple.spot  = 'cellar';
   // Drop phone again so player can pick it up after Phase 3 is beaten
   hasPhone     = false;
@@ -3295,7 +3297,7 @@ function doInteract(){
     var adx=ammo.x-playerPos.x, adz=ammo.z-playerPos.z;
     if(Math.sqrt(adx*adx+adz*adz)<2.4){
       collectedAmmo.add(ammo.id);
-      respawnTimers[ammo.id] = Date.now() + 45000;
+      respawnTimers[ammo.id] = Date.now() + SHOTGUN_AMMO_RESPAWN_MS;
       shotgunAmmo+=ammo.amount;
       updateWeaponUI();
       showMsg('Picked up '+ammo.amount+' shotgun shells!', 2200);
@@ -3310,7 +3312,7 @@ function doInteract(){
     var pdx2=pammo.x-playerPos.x, pdz2=pammo.z-playerPos.z;
     if(Math.sqrt(pdx2*pdx2+pdz2*pdz2)<2.4){
       collectedAmmo.add(pammo.id);
-      respawnTimers[pammo.id] = Date.now() + 45000;
+      respawnTimers[pammo.id] = Date.now() + PISTOL_AMMO_RESPAWN_MS;
       pistolAmmo+=pammo.amount;
       updateWeaponUI();
       showMsg('Picked up '+pammo.amount+' pistol bullets!', 2200);
@@ -3323,7 +3325,7 @@ function doInteract(){
     var medkit=MED_KIT_ITEMS[mi];
     if(medkit.spot!==currentSpot||collectedMedkits.has(medkit.id)) continue;
     var mdx=medkit.x-playerPos.x, mdz=medkit.z-playerPos.z;
-    if(Math.sqrt(mdx*mdx+mdz*mdz)<2.5){
+    if(Math.sqrt(mdx*mdx+mdz*mdz)<1.8){
       collectedMedkits.add(medkit.id);
       respawnTimers[medkit.id] = Date.now() + MED_KIT_RESPAWN_MS;
       playerHp = MAX_HP;
@@ -4014,6 +4016,7 @@ function animate(){
     if(dist<1.8){
       var dmg=ebot.name==='FARMER'?(farmerPhase===3?4.0:(farmerPhase===2?2.5:1.0)):
               (ebot.name==='RAT'?0.35:(ebot.name.indexOf('PLUSH')>=0?.22:(ebot.cage?.90:(ebot.big?1.12:.45))));
+      if(ebot.name.indexOf('PLUSH') < 0) dmg *= 1.5;
       playerHp-=dmg; flashDamage(); lastDamageSource=ebot.name;
     }
 

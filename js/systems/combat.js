@@ -144,7 +144,7 @@ function killBot(key, mesh, bot){
   showMsg(bot.name + ' defeated!' + (isPlush || bot.name === 'FARMER' ? '' : ' (others may rebuild it...)'), 2400);
   if(bot.name === 'FARMER'){
     if(farmerPhase === 1){
-      bot.hp = 600;
+      bot.hp = 1800;
       bot.alive = true;
       farmerPhase = 2;
       bot.spot = currentSpot;

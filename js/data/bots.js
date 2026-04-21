@@ -34,16 +34,16 @@ const STAGE_ORDER = [
 
 
 var bots = {
-  freddy:   { spot:'barn', hp:100, maxHp:100, name:'COW',          color:0xf2f0ee, alive:true, big:true  },
-  bonnie:   { spot:'barn', hp:40,  maxHp:40,  name:'PIG',          color:0xff88bb, alive:true },
-  chica:    { spot:'barn', hp:40,  maxHp:40,  name:'CHICKEN',      color:0xffe050, alive:true },
-  foxy:     { spot:'barn', hp:40,  maxHp:40,  name:'FOX',          color:0xe86020, alive:true },
-  pfox:     { spot:'barn', hp:100, maxHp:100, name:'TURKEY',       color:0xcc7722, alive:true, big:true  },
-  sparky:   { spot:'barn', hp:40,  maxHp:40,  name:'GOAT',         color:0xa0c878, alive:true },
-  endo:     { spot:'barn', hp:40,  maxHp:40,  name:'SHEEP',        color:0xf0f0e8, alive:true },
-  gbear:    { spot:'barn', hp:124, maxHp:124, name:'WOLF',         color:0x9090cc, alive:true, big:true  },
-  rabbit:   { spot:'barn', hp:40,  maxHp:40,  name:'BUNNY',        color:0xf0ddee, alive:true },
-  rat:      { spot:'vents', hp:24, maxHp:24,  name:'RAT',          color:0x777777, alive:true, small:true },
+  freddy:   { spot:'barn', hp:300, maxHp:300, name:'COW',          color:0xf2f0ee, alive:true, big:true  },
+  bonnie:   { spot:'barn', hp:120, maxHp:120, name:'PIG',          color:0xff88bb, alive:true },
+  chica:    { spot:'barn', hp:120, maxHp:120, name:'CHICKEN',      color:0xffe050, alive:true },
+  foxy:     { spot:'barn', hp:120, maxHp:120, name:'FOX',          color:0xe86020, alive:true },
+  pfox:     { spot:'barn', hp:300, maxHp:300, name:'TURKEY',       color:0xcc7722, alive:true, big:true  },
+  sparky:   { spot:'barn', hp:120, maxHp:120, name:'GOAT',         color:0xa0c878, alive:true },
+  endo:     { spot:'barn', hp:120, maxHp:120, name:'SHEEP',        color:0xf0f0e8, alive:true },
+  gbear:    { spot:'barn', hp:372, maxHp:372, name:'WOLF',         color:0x9090cc, alive:true, big:true  },
+  rabbit:   { spot:'barn', hp:120, maxHp:120, name:'BUNNY',        color:0xf0ddee, alive:true },
+  rat:      { spot:'vents', hp:72, maxHp:72,  name:'RAT',          color:0x777777, alive:true, small:true },
   // ── Toy / Plush versions — spawn in Petting Zoo ────────────────────────────
   tfreddy:  { spot:'petting_zoo', hp:2,   maxHp:2,   name:'PLUSH COW',    color:0xaaddff, alive:true },
   tbonnie:  { spot:'petting_zoo', hp:2,   maxHp:2,   name:'PLUSH PIG',    color:0xffbbdd, alive:true },
@@ -56,10 +56,10 @@ var bots = {
   ptbunny:  { spot:'petting_zoo', hp:2,   maxHp:2,   name:'PLUSH BUNNY',  color:0xffd0ee, alive:true },
   // ────────────────────────────────────────────────────────────────────────────
   // ── Cage animatronics — 3× health, 2× speed & damage ─────────────────────
-  frog:     { spot:'cage', hp:120, maxHp:120, name:'FROG',  color:0x33aa44, alive:true, cage:true },
-  panda:    { spot:'cage', hp:120, maxHp:120, name:'PANDA', color:0xfafafa, alive:true, cage:true },
-  rhino:    { spot:'cage', hp:120, maxHp:120, name:'RHINO', color:0x7a8878, alive:true, cage:true },
-  horse:    { spot:'cage', hp:120, maxHp:120, name:'HORSE', color:0x8B5520, alive:true, cage:true },
-  dog:      { spot:'dog_house', hp:40,  maxHp:40,  name:'FARM DOG', color:0xd4a060, alive:true, tamed:false },
-  purple:   { spot:'cellar',    hp:600, maxHp:600, name:'FARMER',   color:0xffaa80, alive:true },
+  frog:     { spot:'cage', hp:360, maxHp:360, name:'FROG',  color:0x33aa44, alive:true, cage:true },
+  panda:    { spot:'cage', hp:360, maxHp:360, name:'PANDA', color:0xfafafa, alive:true, cage:true },
+  rhino:    { spot:'cage', hp:360, maxHp:360, name:'RHINO', color:0x7a8878, alive:true, cage:true },
+  horse:    { spot:'cage', hp:360, maxHp:360, name:'HORSE', color:0x8B5520, alive:true, cage:true },
+  dog:      { spot:'dog_house', hp:120, maxHp:120, name:'FARM DOG', color:0xd4a060, alive:true, tamed:false },
+  purple:   { spot:'cellar',    hp:1800, maxHp:1800, name:'FARMER', color:0xffaa80, alive:true },
 };
