@@ -1647,21 +1647,32 @@ function buildArcade(){
   [-7,-3.5,0,3.5].forEach(function(z){
     // Cabinet body
     scene.add(makeBox(1.4,3.2,0.9,CABINET_DARK,-ROOM_HALF+0.55,1.6,z));
+    // Cabinet feet
+    [[-0.5,-0.35],[0.5,-0.35],[-0.5,0.35],[0.5,0.35]].forEach(function(f){
+      scene.add(makeBox(0.12,0.06,0.12,0x000000,-ROOM_HALF+0.55+f[0],0.03,z+f[1]));
+    });
+    // Side trim panels
+    scene.add(makeBox(0.08,3.0,0.08,0x0a0a1a,-ROOM_HALF+0.02,1.6,z));
+    scene.add(makeBox(0.08,3.0,0.08,0x0a0a1a,-ROOM_HALF+1.08,1.6,z));
     // Screen bezel
     scene.add(makeBox(0.06,1.10,0.82,0x222233,-ROOM_HALF+0.55,2.6,z));
     // Screen glow
     scene.add(makeBox(0.05,0.95,0.70,SCREEN_GLOW,-ROOM_HALF+0.54,2.6,z));
-    // Marquee light strip (top)
-    scene.add(makeBox(0.07,0.18,0.88,NEON_PURPLE,-ROOM_HALF+0.55,3.29,z));
+    // Marquee light strip (top) - enhanced colors
+    scene.add(makeBox(0.07,0.12,0.88,NEON_PURPLE,-ROOM_HALF+0.55,3.35,z));
+    scene.add(makeBox(0.07,0.10,0.88,0xffff00,-ROOM_HALF+0.55,3.27,z));
+    // Speaker grille
+    scene.add(makeBox(0.04,0.35,0.60,0x111111,-ROOM_HALF+0.55,0.80,z));
     // Control panel slope
     scene.add(makeBox(0.55,0.08,0.88,0x181828,-ROOM_HALF+0.29,1.74,z,0,0,-0.42));
     // Joystick
     scene.add(makeCylinder(.04,.04,.28,0x333344,-ROOM_HALF+0.18,1.82,z-.18));
     scene.add(makeSphere(.07,0xcc2244,-ROOM_HALF+0.18,1.97,z-.18));
-    // Buttons row
+    // Buttons row - more vibrant
     [-.10,.06,.22].forEach(function(dz){
       var cols=[0xff2222,0x22ff44,0x2244ff];
-      scene.add(makeCylinder(.04,.04,.04,cols[Math.round((dz+.10)/.16)],-ROOM_HALF+0.14,1.86,z+dz));
+      scene.add(makeCylinder(.045,.045,.05,cols[Math.round((dz+.10)/.16)],-ROOM_HALF+0.14,1.86,z+dz));
+      scene.add(makeSphere(.03,0xffffff,-ROOM_HALF+0.14,1.92,z+dz));  // highlight
     });
     // Coin slot
     scene.add(makeBox(0.04,0.04,0.18,0x444455,-ROOM_HALF+0.08,1.55,z));
@@ -1670,30 +1681,108 @@ function buildArcade(){
   // ── Arcade cabinets along east wall ────────────────────────────────────────
   [-6,-1.5,3].forEach(function(z){
     scene.add(makeBox(1.4,3.2,0.9,CABINET_MID,ROOM_HALF-0.55,1.6,z));
+    // Cabinet feet
+    [[-0.5,-0.35],[0.5,-0.35],[-0.5,0.35],[0.5,0.35]].forEach(function(f){
+      scene.add(makeBox(0.12,0.06,0.12,0x000000,ROOM_HALF-0.55+f[0],0.03,z+f[1]));
+    });
+    // Side trim panels
+    scene.add(makeBox(0.08,3.0,0.08,0x0a0a1a,ROOM_HALF-0.02,1.6,z));
+    scene.add(makeBox(0.08,3.0,0.08,0x0a0a1a,ROOM_HALF-1.08,1.6,z));
     scene.add(makeBox(0.06,1.10,0.82,0x222233,ROOM_HALF-0.55,2.6,z));
     scene.add(makeBox(0.05,0.95,0.70,0x0a3a2a,ROOM_HALF-0.54,2.6,z));   // green screen
-    scene.add(makeBox(0.07,0.18,0.88,NEON_CYAN,ROOM_HALF-0.55,3.29,z));  // cyan marquee
+    // Enhanced marquee with dual colors
+    scene.add(makeBox(0.07,0.12,0.88,NEON_CYAN,ROOM_HALF-0.55,3.35,z));
+    scene.add(makeBox(0.07,0.10,0.88,0x00ff00,ROOM_HALF-0.55,3.27,z));
+    // Speaker grille
+    scene.add(makeBox(0.04,0.35,0.60,0x111111,ROOM_HALF-0.55,0.80,z));
     scene.add(makeBox(0.55,0.08,0.88,0x181828,ROOM_HALF-0.29,1.74,z,0,0,0.42));
     scene.add(makeCylinder(.04,.04,.28,0x333344,ROOM_HALF-0.18,1.82,z+.18));
     scene.add(makeSphere(.07,0x2244cc,ROOM_HALF-0.18,1.97,z+.18));
     [-.10,.06,.22].forEach(function(dz){
-      scene.add(makeCylinder(.04,.04,.04,0xffaa00,ROOM_HALF-0.14,1.86,z+dz));
+      scene.add(makeCylinder(.045,.045,.05,0xffaa00,ROOM_HALF-0.14,1.86,z+dz));
+      scene.add(makeSphere(.03,0xffffff,ROOM_HALF-0.14,1.92,z+dz));  // highlight
     });
     scene.add(makeBox(0.04,0.04,0.18,0x444455,ROOM_HALF-0.08,1.55,z));
   });
 
-  // ── Prize counter along north wall ─────────────────────────────────────────
-  scene.add(makeBox(16.0,1.10,1.0,0x1a1a2e,0,0.55,-ROOM_HALF+0.55));  // base
-  scene.add(makeBox(16.0,0.06,1.0,0x224466,0,1.12,-ROOM_HALF+0.55));  // glass top
-  // Prize items inside case
-  [-5,-2,1,4].forEach(function(x){
-    scene.add(makeCylinder(.18,.18,.32,0xffcc00,x,0.70,-ROOM_HALF+0.5)); // trophy
-    scene.add(makeCylinder(.10,.10,.24,0xddaa00,x,0.98,-ROOM_HALF+0.5));
-    scene.add(makeSphere(.14,0xffdd22,x,1.14,-ROOM_HALF+0.5));
+  // ── Floor-standing arcade cabinets (center area) ──────────────────────────
+  // Tall cabinet towers in middle zones
+  [[-4,0],[4,0],[0,-4],[0,4]].forEach(function(pos){
+    var colors = [[0x1a1a33, 0xffff00], [0x1a1a33, 0x00ff00], [0x2a1a33, 0xff00ff], [0x1a2a33, 0x00ffff]];
+    var colorSet = colors[Math.floor(Math.random()*colors.length)];
+    scene.add(makeBox(1.2,3.5,0.8,0x1a1a33,pos[0],1.75,pos[1]));  // cabinet
+    // Cabinet feet
+    [[-0.5,-0.35],[0.5,-0.35],[-0.5,0.35],[0.5,0.35]].forEach(function(f){
+      scene.add(makeBox(0.10,0.05,0.10,0x000000,pos[0]+f[0],0.025,pos[1]+f[1]));
+    });
+    scene.add(makeBox(0.08,1.40,0.72,0x222233,pos[0],2.75,pos[1]));  // screen bezel
+    scene.add(makeBox(0.06,1.30,0.65,0x2a3a4a,pos[0],2.75,pos[1]));  // screen
+    scene.add(makeBox(0.05,1.18,0.60,0x0a2a5a,pos[0],2.75,pos[1]));  // screen glow
+    // Control panel with better detail
+    scene.add(makeBox(0.50,0.08,0.75,0x181828,pos[0],1.6,pos[1]));
+    scene.add(makeBox(0.04,0.10,0.70,colorSet[1],pos[0],1.68,pos[1]));  // bright trim
+    // Buttons and joystick
+    [[-0.18,-0.15],[0.18,-0.15],[-0.18,0.15],[0.18,0.15]].forEach(function(dz){
+      scene.add(makeCylinder(0.04,0.04,0.05,0xff2244,pos[0]+dz[0],1.72,pos[1]+dz[1]));
+      scene.add(makeSphere(0.02,0xffffff,pos[0]+dz[0],1.78,pos[1]+dz[1]));
+    });
+    scene.add(makeCylinder(0.05,0.05,0.16,0x333344,pos[0],1.7,pos[1]-0.2));
+    // Speaker grille
+    scene.add(makeBox(0.03,0.25,0.65,0x111111,pos[0],0.85,pos[1]));
   });
-  // Ticket dispenser on counter
-  scene.add(makeBox(0.40,0.52,0.30,0xcc2233,6,1.38,-ROOM_HALF+0.52));
-  scene.add(makeBox(0.06,0.06,0.28,0xffcccc,6,1.12,-ROOM_HALF+0.52));
+
+  // ── Racing cabinet ────────────────────────────────────────────────────────
+  // Large racing arcade machine with enhanced details
+  scene.add(makeBox(1.8,2.2,1.2,0x2a2a3a,-5,1.1,-2));  // base
+  // Racing cabinet feet
+  [[-0.7,-0.5],[0.7,-0.5],[-0.7,0.5],[0.7,0.5]].forEach(function(f){
+    scene.add(makeBox(0.12,0.06,0.10,0x000000,-5+f[0],0.03,-2+f[1]));
+  });
+  scene.add(makeBox(1.6,1.4,1.0,0x1a1a2a,-5,1.8,-2));  // upper cabinet
+  // Cabinet trim
+  scene.add(makeBox(0.08,1.5,0.95,0x00ccff,-5,2.0,-2));  // cyan trim
+  scene.add(makeBox(0.07,0.8,0.85,0x0a3a6a,-5,2.2,-2));  // screen
+  scene.add(makeBox(0.06,0.75,0.80,0x2a5aaa,-5,2.2,-2));  // screen glow
+  // Steering wheel with better detail
+  scene.add(makeBox(0.50,0.12,0.95,0xdd6644,-5,0.8,-2));  // steering wheel base
+  scene.add(makeCylinder(0.22,0.22,0.10,0x554433,-5,0.90,-2));  // steering wheel
+  scene.add(makeCylinder(0.18,0.18,0.12,0x886644,-5,0.92,-2));  // wheel rim
+  scene.add(makeSphere(0.05,0xff4444,-5-0.18,0.95,-2));  // spoke highlight
+  scene.add(makeSphere(0.05,0xff4444,-5+0.18,0.95,-2));  // spoke highlight
+  // Pedal area
+  scene.add(makeBox(0.60,0.06,0.30,0x333333,-5,0.42,-2));
+  // Shift gear area  
+  scene.add(makeBox(0.15,0.30,0.10,0x664422,-5-0.35,0.70,-2));
+  scene.add(makeBox(0.15,0.30,0.10,0x664422,-5+0.35,0.70,-2));
+
+  // ── Prize counter along north wall (with center opening) ──────────────────
+  // Left section of counter
+  scene.add(makeBox(6.5,1.10,1.0,0x1a1a2e,-4.0,0.55,-ROOM_HALF+2.5));  // base
+  scene.add(makeBox(6.5,0.06,1.0,0x224466,-4.0,1.12,-ROOM_HALF+2.5));  // glass top
+  // Right section of counter
+  scene.add(makeBox(6.5,1.10,1.0,0x1a1a2e,4.0,0.55,-ROOM_HALF+2.5));  // base
+  scene.add(makeBox(6.5,0.06,1.0,0x224466,4.0,1.12,-ROOM_HALF+2.5));  // glass top
+  // Counter edge trim
+  scene.add(makeBox(0.12,0.06,1.0,0x334455,-6.6,1.12,-ROOM_HALF+2.5));  // left edge
+  scene.add(makeBox(0.12,0.06,1.0,0x334455,6.6,1.12,-ROOM_HALF+2.5));   // right edge
+  
+  // Prize items inside case - left side
+  [-5,-2].forEach(function(x){
+    scene.add(makeCylinder(.18,.18,.32,0xffcc00,x,0.70,-ROOM_HALF+2.45)); // trophy
+    scene.add(makeCylinder(.10,.10,.24,0xddaa00,x,0.98,-ROOM_HALF+2.45));
+    scene.add(makeSphere(.14,0xffdd22,x,1.14,-ROOM_HALF+2.45));
+  });
+  // Prize items inside case - right side
+  [1,4].forEach(function(x){
+    scene.add(makeCylinder(.18,.18,.32,0xffcc00,x,0.70,-ROOM_HALF+2.45)); // trophy
+    scene.add(makeCylinder(.10,.10,.24,0xddaa00,x,0.98,-ROOM_HALF+2.45));
+    scene.add(makeSphere(.14,0xffdd22,x,1.14,-ROOM_HALF+2.45));
+  });
+  // Ticket dispensers on counter
+  scene.add(makeBox(0.40,0.52,0.30,0xcc2233,-6.5,1.38,-ROOM_HALF+2.52));
+  scene.add(makeBox(0.06,0.06,0.28,0xffcccc,-6.5,1.12,-ROOM_HALF+2.52));
+  scene.add(makeBox(0.40,0.52,0.30,0xcc2233,6.5,1.38,-ROOM_HALF+2.52));
+  scene.add(makeBox(0.06,0.06,0.28,0xffcccc,6.5,1.12,-ROOM_HALF+2.52));
 
   // ── Central token machine ───────────────────────────────────────────────────
   scene.add(makeBox(0.90,2.20,0.90,0x222233,0,1.10,2));
@@ -1703,13 +1792,116 @@ function buildArcade(){
   // Token slot
   scene.add(makeBox(0.04,0.12,0.06,0x334455,0,1.60,1.55));
 
-  // ── Neon sign on south wall ─────────────────────────────────────────────────
+  // ── Pinball machines ──────────────────────────────────────────────────────
+  // Corner pinball machines with enhanced details
+  [[-7.5,-5.5],[7.5,-5.5],[-7.5,5.5],[7.5,5.5]].forEach(function(pos){
+    scene.add(makeBox(0.95,2.8,1.8,0x1a1a2a,pos[0],1.4,pos[1]));  // machine body
+    // Machine feet
+    [[-0.35,-0.8],[0.35,-0.8],[-0.35,0.8],[0.35,0.8]].forEach(function(f){
+      scene.add(makeBox(0.12,0.06,0.12,0x000000,pos[0]+f[0],0.03,pos[1]+f[1]));
+    });
+    // Playfield with glass reflection
+    scene.add(makeBox(0.08,2.5,1.6,0x0a0aaa,pos[0],1.5,pos[1]));  // blue playfield glass
+    scene.add(makeBox(0.07,2.45,1.55,0x1a3a7a,pos[0],1.5,pos[1]));  // inner glow
+    // Bumpers (visible through glass)
+    [-0.4,0,0.4].forEach(function(bx){
+      scene.add(makeSphere(0.12,0xff6600,pos[0]+bx,1.8,pos[1]));
+    });
+    // Top marquee with lights
+    scene.add(makeBox(0.06,0.22,0.90,NEON_PINK,pos[0],2.85,pos[1]));
+    scene.add(makeBox(0.05,0.18,0.88,0xff00ff,pos[0],2.87,pos[1]));
+    // Flippers with detail
+    scene.add(makeCylinder(0.08,0.08,0.14,0xff6600,pos[0]-0.35,0.8,pos[1]));
+    scene.add(makeCylinder(0.06,0.06,0.12,0xffaa44,pos[0]-0.35,0.82,pos[1]));  // highlight
+    scene.add(makeCylinder(0.08,0.08,0.14,0xff6600,pos[0]+0.35,0.8,pos[1]));
+    scene.add(makeCylinder(0.06,0.06,0.12,0xffaa44,pos[0]+0.35,0.82,pos[1]));  // highlight
+    // Ball launch area
+    scene.add(makeBox(0.04,0.12,0.30,0x444444,pos[0],1.15,pos[1]+0.7));
+  });
+
+  // ── Arcade stools ────────────────────────────────────────────────────────
+  // Seating areas near token machine
+  [[-3,3.5],[3,3.5]].forEach(function(pos){
+    scene.add(makeBox(0.50,0.06,0.50,0xaa5533,pos[0],0.45,pos[1]));  // seat
+    scene.add(makeCylinder(0.08,0.08,0.45,0x664422,pos[0],0.225,pos[1]));  // pedestal
+  });
+
+  // ── Arcade game posters on walls ───────────────────────────────────────
+  // West wall posters
+  [-6.5,-2.5,1.5].forEach(function(z){
+    scene.add(makeBox(0.04,1.2,0.8,0x333344,-ROOM_HALF+0.02,2.5,z));  // frame
+    scene.add(makeBox(0.03,1.15,0.75,0xff4422,-ROOM_HALF+0.01,2.5,z));  // red poster
+  });
+
+  // East wall posters
+  [-5,1.5].forEach(function(z){
+    scene.add(makeBox(0.04,1.2,0.8,0x333344,ROOM_HALF-0.02,2.5,z));  // frame
+    scene.add(makeBox(0.03,1.15,0.75,0x22ff44,ROOM_HALF-0.01,2.5,z));  // green poster
+  });
+
+  // ── Snack counter area ───────────────────────────────────────────────────
+  // Drink stand near east wall
+  scene.add(makeBox(1.2,0.06,0.6,0x3a5a6a,8.5,0.45,-2));  // counter top
+  scene.add(makeBox(1.1,1.2,0.5,0x2a3a4a,8.5,0.65,-2));  // cabinet
+  // Cups and items on counter
+  [-0.3,0,0.3].forEach(function(dx){
+    scene.add(makeCylinder(0.08,0.10,0.30,0xdd4444,8.5+dx,0.75,-2));  // cups
+  });
+
+  // ── Shelving with arcade memorabilia ──────────────────────────────────
+  // Shelves on west wall between cabinets
+  [-8.5,-4.5].forEach(function(z){
+    scene.add(makeBox(1.0,0.06,0.8,0x3a3a4a,-ROOM_HALF+0.70,2.5,z));  // shelf
+    // Items on shelves
+    [-0.3,0,0.3].forEach(function(dx){
+      scene.add(makeSphere(0.08,0xffcc00,-ROOM_HALF+0.60+dx,2.55,z));  // gold collectibles
+    });
+  });
+
+  // ── Scattered game boxes on floor ────────────────────────────────────
+  // Stack of arcade game boxes
+  [-6,-4,-2,2,4,6].forEach(function(z){
+    scene.add(makeBox(0.5,0.3,0.4,0xaa3344,-8.5,0.15,z));
+    scene.add(makeBox(0.45,0.25,0.35,0xff5566,-8.5,0.27,z));
+  });
+  // Another stack on east side
+  [1,3,5].forEach(function(z){
+    scene.add(makeBox(0.4,0.25,0.35,0x3344aa,8.0,0.125,z));
+  });
+
+  // ── Additional glowing game boxes ────────────────────────────────────
+  // Accent boxes scattered around
+  [[-3,-6],[3,6]].forEach(function(pos){
+    scene.add(makeBox(0.6,1.8,0.6,0x1a1a2a,pos[0],0.9,pos[1]));  // small cabinet
+    scene.add(makeBox(0.04,1.6,0.55,NEON_CYAN,pos[0],1.0,pos[1]));  // glowing trim
+  });
+
+  // ── Additional neon rim lighting ──────────────────────────────────────
+  // Corner neon strips for atmosphere
+  [-8.5,8.5].forEach(function(x){
+    scene.add(makeBox(0.04,0.12,22,NEON_CYAN,x,3.8,0));
+  });
+  [-9.5,9.5].forEach(function(z){
+    scene.add(makeBox(18,0.04,0.12,NEON_PURPLE,0,3.8,z));
+  });
+
+  // ── Arcade sounds/ambiance indicators ──────────────────────────────────
+  // Glowing indicator lights on central machine
+  [-0.2,0,0.2].forEach(function(dx){
+    scene.add(makeSphere(0.05,0xffff00,dx,1.35,2));  // yellow lights
+  });
+
+  // Neon sign on south wall ─────────────────────────────────────────────────
   // "ARCADE" bar
   scene.add(makeBox(0.06,0.26,5.0,NEON_PINK,0,3.80,ROOM_HALF-0.08));
   scene.add(makeBox(0.06,0.26,5.0,NEON_PURPLE,0,3.48,ROOM_HALF-0.08));
   // Vertical end caps
   scene.add(makeBox(0.06,0.58,0.10,NEON_CYAN,-2.5,3.64,ROOM_HALF-0.08));
   scene.add(makeBox(0.06,0.58,0.10,NEON_CYAN, 2.5,3.64,ROOM_HALF-0.08));
+
+  // Additional vertical neon accent strips
+  scene.add(makeBox(0.06,3.2,0.10,NEON_PINK,-4.5,2.0,ROOM_HALF-0.08));
+  scene.add(makeBox(0.06,3.2,0.10,NEON_PINK, 4.5,2.0,ROOM_HALF-0.08));
 
   // ── Floor ──────────────────────────────────────────────────────────────────
   // Checkerboard-style grid lines
@@ -1721,7 +1913,12 @@ function buildArcade(){
   scene.add(makeBox(.08,.002,22,NEON_PURPLE,0,.001,0));
   scene.add(makeBox(22,.002,.08,NEON_PURPLE,0,.001,0));
 
+  // ── Arcade labels and signs ───────────────────────────────────────────────
   addLabel('INSERT COIN',0,3.20,ROOM_HALF-0.1,'#ff0066');
+  addLabel('TOKENS',0,1.90,1.5,'#00ccff');
+  addLabel('HIGH SCORES',0,3.50,-ROOM_HALF+1.5,'#ffff00');
+  addLabel('PLAY',4,2.0,3.5,'#ff00ff');
+  addLabel('PINBALL',7.5,3.5,-5.5,'#ff0066');
 }
 
 
