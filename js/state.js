@@ -81,6 +81,7 @@ var doorTransitionCooldown;
 var hungerDrainTimer;
 var starvationTimer;
 var collectedMedkits;
+var night;
 
 function resetRuntimeState(){
   gameStarted = false;
@@ -94,7 +95,7 @@ function resetRuntimeState(){
   flashlightOn = false;
   hasBone = false;
   hasEscapeKey = false;
-  keySpot = 'farmhouse';
+  keySpot = 'guard_shack';
   dogTamed = false;
   farmerPhase = 1;
   timeTicks = 0;
@@ -164,4 +165,5 @@ function resetRuntimeState(){
   hungerDrainTimer = 0;
   starvationTimer = 0;
   collectedMedkits = new Set();
+  night = 1;
 }

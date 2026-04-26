@@ -202,10 +202,19 @@ function showPacifistDriveHome(){
 }
 
 function triggerWin(){
-  if(hasEscapeKey){
-    showCarCrashCutscene(function(){ showRevealEnding(); });
+  if(night < 4){
+    night++;
+    showMsg('Night ' + (night-1) + ' survived! Starting Night ' + night + '...', 5000);
+    setTimeout(function(){
+      resetRuntimeState();
+      init();
+    }, 3000);
   } else {
-    showRevealEnding();
+    if(hasEscapeKey){
+      showCarCrashCutscene(function(){ showRevealEnding(); });
+    } else {
+      showRevealEnding();
+    }
   }
 }
 

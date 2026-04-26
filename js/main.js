@@ -55,16 +55,6 @@ var ROOM_SOLIDS = {
     {x: 0.0, z:-6.0, hw:1.9, hd:1.1},
     {x:-7.0, z:-8.0, hw:1.8, hd:0.9},
   ],
-  arcade: [
-    {x:-10.2, z:-5.0, hw:0.9, hd:1.5},
-    {x:-10.2, z: 0.0, hw:0.9, hd:1.5},
-    {x:-10.2, z: 5.0, hw:0.9, hd:1.5},
-    {x: 10.2, z:-5.0, hw:0.9, hd:1.5},
-    {x: 10.2, z: 0.0, hw:0.9, hd:1.5},
-    {x: 10.2, z: 5.0, hw:0.9, hd:1.5},
-    {x: 0.0,  z:-10.45, hw:8.3, hd:1.1},
-    {x: 0.0,  z: 2.0,    hw:0.8, hd:0.8},
-  ],
   restrooms: [
     {x: 0.0, z:10.5, hw:4.3, hd:0.9},
   ],
@@ -284,7 +274,7 @@ function buildRoom() {
   }
 
   // Escape key pickup
-  if(currentSpot===keySpot&&!hasEscapeKey&&timeExpired){
+  if(currentSpot===keySpot&&!hasEscapeKey){
     scene.add(makeCylinder(.08,.08,.04,0xffd700,3.5,.30,-3));
     scene.add(makeBox(.3,.04,.04,0xffd700,3.6,.30,-3));
     scene.add(makeBox(.06,.12,.04,0xffd700,3.78,.26,-3));
@@ -339,6 +329,19 @@ function buildVentAccess(){
   scene.add(makeBox(1.9,0.06,1.3,0x2a2a2a, vent.roomX, 0.09, vent.roomZ));
   for(var slat=-2; slat<=2; slat++){
     scene.add(makeBox(0.22,0.02,1.0,0x888888, vent.roomX + slat*0.30, 0.12, vent.roomZ));
+  }
+  // Add dust and cobwebs
+  scene.add(makeBox(1.7,0.01,1.1,0xaaaaaa, vent.roomX, 0.13, vent.roomZ));
+  for(var d=0; d<5; d++){
+    var dx = (Math.random()-0.5)*1.6;
+    var dz = (Math.random()-0.5)*1.0;
+    scene.add(makeBox(0.05,0.01,0.05,0xdddddd, vent.roomX + dx, 0.14, vent.roomZ + dz));
+  }
+  // Cobweb strands
+  for(var c=0; c<3; c++){
+    var cx = vent.roomX + (Math.random()-0.5)*1.8;
+    var cz = vent.roomZ + (Math.random()-0.5)*1.2;
+    scene.add(makeBox(0.01,0.01,0.8,0xffffff, cx, 0.15, cz));
   }
   addLabel(crouching ? 'F = ENTER VENT' : 'CROUCH + F = ENTER VENT', vent.roomX, 1.1, vent.roomZ, '#88ddff');
 }
@@ -575,22 +578,16 @@ function buildGuardShack(){
     addLabel('\uD83D\uDD13 F = LOCK DOOR', ROOM_HALF-3.0, 1.9, 0, '#44ff88');
   }
 
-  // Filing cabinet
+  // Locker (filing cabinet styled as locker)
   scene.add(makeBox(.90,2.00,.60,0x444455,-4.5,1.00,-4.5));
-  [.50,1.20,1.90].forEach(function(dy){
-    scene.add(makeBox(.88,.06,.58,0x333344,-4.5,dy,-4.5));
-    scene.add(makeBox(.30,.04,.04,0x888888,-4.5,dy,-4.2));
-  });
+  scene.add(makeBox(.88,.06,.58,0x333344,-4.5,0.5,-4.5));
+  scene.add(makeBox(.88,.06,.58,0x333344,-4.5,1.5,-4.5));
+  scene.add(makeBox(.02,1.80,.02,0x222222,-4.5,1.00,-4.2));
+  scene.add(makeBox(.85,.04,.55,0x666666,-4.5,0.52,-4.5)); // vent slats on door
+  for(var s=-2; s<=2; s++){
+    scene.add(makeBox(.80,.01,.02,0x777777,-4.5,0.52 + s*0.15,-4.48));
+  }
 
-  // Security camera on north wall
-  scene.add(makeBox(.18,.12,.24,0x333333, 3.5,4.20,-10.88));
-  scene.add(makeSphere(.08,0x222222, 3.5,4.18,-10.68));
-
-  // Barred window
-  scene.add(makeBox(1.4,1.2,.08,0x283040, 3.5,2.5,-10.88));
-  [3.0,3.5,4.0].forEach(function(bx){
-    scene.add(makeBox(.06,1.2,.12,0x445566,bx,2.5,-10.85));
-  });
   addWindow(-ROOM_HALF+.07,2.5,-5,0,1.2,1.6,'z');
 
   // Horror: dried blood smear on east wall
@@ -622,16 +619,17 @@ function buildGuardShack(){
     scene.add(makeBox(.04,.32,.04,0x4a2a08,4.5+lx,.16,-8+lz));
   });});
 
-  // Posters on south wall
-  scene.add(makeBox(.06,.80,1.20,0x9a7a50, 10.92,2.40, 3.0));
-  scene.add(makeBox(.04,.70,1.10,0xcc3322, 10.92,2.40, 3.0));
-  scene.add(makeBox(.06,.80,1.20,0x9a7a50, 10.92,2.40,-1.0));
-  scene.add(makeBox(.04,.70,1.10,0x336688, 10.92,2.40,-1.0));
-
   // Wall clock
-  scene.add(makeCylinder(.22,.22,.04,0x888888, 0,3.2,-10.93,Math.PI/2,0,0));
-  scene.add(makeBox(.02,.20,.02,0x111111, 0,3.32,-10.90));
-  if(weapon==='none') addLabel('F = OFFICE BAT',0,2.0,-3.8,'#ccccff');
+  scene.add(makeCylinder(.22,.22,.04,0x888888, 6,3.2,-10.93,Math.PI/2,0,0));
+  scene.add(makeBox(.02,.20,.02,0x111111, 6,3.32,-10.90));
+
+  // Posters on east wall
+  scene.add(makeBox(.06,.80,1.20,0x9a7a50,10.92,2.40, 3.0));
+  scene.add(makeBox(.04,.70,1.10,0xcc3322,10.92,2.40, 3.0));
+  scene.add(makeBox(.06,.80,1.20,0x9a7a50,10.92,2.40,-1.0));
+  scene.add(makeBox(.04,.70,1.10,0x336688,10.92,2.40,-1.0));
+
+  addLabel('GUARD SHACK — where the key awaits',0,3.8,-9,'#9944cc');
 
   // Taser on desk (yellow body + prongs)
   if(!ownedWeapons.has('taser')){
@@ -1242,6 +1240,12 @@ function buildVents(){
     for(var slat=-1;slat<=1;slat++){
       scene.add(makeBox(0.20,0.02,0.86,0x999999, vent.ventX + slat*0.28, 0.16, vent.ventZ));
     }
+    // Add dust
+    for(var d=0; d<3; d++){
+      var dx = (Math.random()-0.5)*1.2;
+      var dz = (Math.random()-0.5)*0.8;
+      scene.add(makeBox(0.03,0.01,0.03,0xdddddd, vent.ventX + dx, 0.18, vent.ventZ + dz));
+    }
     addLabel('F = EXIT TO ' + vent.label, vent.ventX, 1.0, vent.ventZ, '#88ddff');
   });
 }
@@ -1643,117 +1647,13 @@ function buildArcade(){
   var NEON_PINK    = 0xff0066;
   var SCREEN_GLOW  = 0x0a2a4a;
 
-  // ── Arcade cabinets along west wall ────────────────────────────────────────
-  [-7,-3.5,0,3.5].forEach(function(z){
-    // Cabinet body
-    scene.add(makeBox(1.4,3.2,0.9,CABINET_DARK,-ROOM_HALF+0.55,1.6,z));
-    // Cabinet feet
-    [[-0.5,-0.35],[0.5,-0.35],[-0.5,0.35],[0.5,0.35]].forEach(function(f){
-      scene.add(makeBox(0.12,0.06,0.12,0x000000,-ROOM_HALF+0.55+f[0],0.03,z+f[1]));
-    });
-    // Side trim panels
-    scene.add(makeBox(0.08,3.0,0.08,0x0a0a1a,-ROOM_HALF+0.02,1.6,z));
-    scene.add(makeBox(0.08,3.0,0.08,0x0a0a1a,-ROOM_HALF+1.08,1.6,z));
-    // Screen bezel
-    scene.add(makeBox(0.06,1.10,0.82,0x222233,-ROOM_HALF+0.55,2.6,z));
-    // Screen glow
-    scene.add(makeBox(0.05,0.95,0.70,SCREEN_GLOW,-ROOM_HALF+0.54,2.6,z));
-    // Marquee light strip (top) - enhanced colors
-    scene.add(makeBox(0.07,0.12,0.88,NEON_PURPLE,-ROOM_HALF+0.55,3.35,z));
-    scene.add(makeBox(0.07,0.10,0.88,0xffff00,-ROOM_HALF+0.55,3.27,z));
-    // Speaker grille
-    scene.add(makeBox(0.04,0.35,0.60,0x111111,-ROOM_HALF+0.55,0.80,z));
-    // Control panel slope
-    scene.add(makeBox(0.55,0.08,0.88,0x181828,-ROOM_HALF+0.29,1.74,z,0,0,-0.42));
-    // Joystick
-    scene.add(makeCylinder(.04,.04,.28,0x333344,-ROOM_HALF+0.18,1.82,z-.18));
-    scene.add(makeSphere(.07,0xcc2244,-ROOM_HALF+0.18,1.97,z-.18));
-    // Buttons row - more vibrant
-    [-.10,.06,.22].forEach(function(dz){
-      var cols=[0xff2222,0x22ff44,0x2244ff];
-      scene.add(makeCylinder(.045,.045,.05,cols[Math.round((dz+.10)/.16)],-ROOM_HALF+0.14,1.86,z+dz));
-      scene.add(makeSphere(.03,0xffffff,-ROOM_HALF+0.14,1.92,z+dz));  // highlight
-    });
-    // Coin slot
-    scene.add(makeBox(0.04,0.04,0.18,0x444455,-ROOM_HALF+0.08,1.55,z));
-  });
 
-  // ── Arcade cabinets along east wall ────────────────────────────────────────
-  [-6,-1.5,3].forEach(function(z){
-    scene.add(makeBox(1.4,3.2,0.9,CABINET_MID,ROOM_HALF-0.55,1.6,z));
-    // Cabinet feet
-    [[-0.5,-0.35],[0.5,-0.35],[-0.5,0.35],[0.5,0.35]].forEach(function(f){
-      scene.add(makeBox(0.12,0.06,0.12,0x000000,ROOM_HALF-0.55+f[0],0.03,z+f[1]));
-    });
-    // Side trim panels
-    scene.add(makeBox(0.08,3.0,0.08,0x0a0a1a,ROOM_HALF-0.02,1.6,z));
-    scene.add(makeBox(0.08,3.0,0.08,0x0a0a1a,ROOM_HALF-1.08,1.6,z));
-    scene.add(makeBox(0.06,1.10,0.82,0x222233,ROOM_HALF-0.55,2.6,z));
-    scene.add(makeBox(0.05,0.95,0.70,0x0a3a2a,ROOM_HALF-0.54,2.6,z));   // green screen
-    // Enhanced marquee with dual colors
-    scene.add(makeBox(0.07,0.12,0.88,NEON_CYAN,ROOM_HALF-0.55,3.35,z));
-    scene.add(makeBox(0.07,0.10,0.88,0x00ff00,ROOM_HALF-0.55,3.27,z));
-    // Speaker grille
-    scene.add(makeBox(0.04,0.35,0.60,0x111111,ROOM_HALF-0.55,0.80,z));
-    scene.add(makeBox(0.55,0.08,0.88,0x181828,ROOM_HALF-0.29,1.74,z,0,0,0.42));
-    scene.add(makeCylinder(.04,.04,.28,0x333344,ROOM_HALF-0.18,1.82,z+.18));
-    scene.add(makeSphere(.07,0x2244cc,ROOM_HALF-0.18,1.97,z+.18));
-    [-.10,.06,.22].forEach(function(dz){
-      scene.add(makeCylinder(.045,.045,.05,0xffaa00,ROOM_HALF-0.14,1.86,z+dz));
-      scene.add(makeSphere(.03,0xffffff,ROOM_HALF-0.14,1.92,z+dz));  // highlight
-    });
-    scene.add(makeBox(0.04,0.04,0.18,0x444455,ROOM_HALF-0.08,1.55,z));
-  });
 
-  // ── Floor-standing arcade cabinets (center area) ──────────────────────────
-  // Tall cabinet towers in middle zones
-  [[-4,0],[4,0],[0,-4],[0,4]].forEach(function(pos){
-    var colors = [[0x1a1a33, 0xffff00], [0x1a1a33, 0x00ff00], [0x2a1a33, 0xff00ff], [0x1a2a33, 0x00ffff]];
-    var colorSet = colors[Math.floor(Math.random()*colors.length)];
-    scene.add(makeBox(1.2,3.5,0.8,0x1a1a33,pos[0],1.75,pos[1]));  // cabinet
-    // Cabinet feet
-    [[-0.5,-0.35],[0.5,-0.35],[-0.5,0.35],[0.5,0.35]].forEach(function(f){
-      scene.add(makeBox(0.10,0.05,0.10,0x000000,pos[0]+f[0],0.025,pos[1]+f[1]));
-    });
-    scene.add(makeBox(0.08,1.40,0.72,0x222233,pos[0],2.75,pos[1]));  // screen bezel
-    scene.add(makeBox(0.06,1.30,0.65,0x2a3a4a,pos[0],2.75,pos[1]));  // screen
-    scene.add(makeBox(0.05,1.18,0.60,0x0a2a5a,pos[0],2.75,pos[1]));  // screen glow
-    // Control panel with better detail
-    scene.add(makeBox(0.50,0.08,0.75,0x181828,pos[0],1.6,pos[1]));
-    scene.add(makeBox(0.04,0.10,0.70,colorSet[1],pos[0],1.68,pos[1]));  // bright trim
-    // Buttons and joystick
-    [[-0.18,-0.15],[0.18,-0.15],[-0.18,0.15],[0.18,0.15]].forEach(function(dz){
-      scene.add(makeCylinder(0.04,0.04,0.05,0xff2244,pos[0]+dz[0],1.72,pos[1]+dz[1]));
-      scene.add(makeSphere(0.02,0xffffff,pos[0]+dz[0],1.78,pos[1]+dz[1]));
-    });
-    scene.add(makeCylinder(0.05,0.05,0.16,0x333344,pos[0],1.7,pos[1]-0.2));
-    // Speaker grille
-    scene.add(makeBox(0.03,0.25,0.65,0x111111,pos[0],0.85,pos[1]));
-  });
 
-  // ── Racing cabinet ────────────────────────────────────────────────────────
-  // Large racing arcade machine with enhanced details
-  scene.add(makeBox(1.8,2.2,1.2,0x2a2a3a,-5,1.1,-2));  // base
-  // Racing cabinet feet
-  [[-0.7,-0.5],[0.7,-0.5],[-0.7,0.5],[0.7,0.5]].forEach(function(f){
-    scene.add(makeBox(0.12,0.06,0.10,0x000000,-5+f[0],0.03,-2+f[1]));
-  });
-  scene.add(makeBox(1.6,1.4,1.0,0x1a1a2a,-5,1.8,-2));  // upper cabinet
-  // Cabinet trim
-  scene.add(makeBox(0.08,1.5,0.95,0x00ccff,-5,2.0,-2));  // cyan trim
-  scene.add(makeBox(0.07,0.8,0.85,0x0a3a6a,-5,2.2,-2));  // screen
-  scene.add(makeBox(0.06,0.75,0.80,0x2a5aaa,-5,2.2,-2));  // screen glow
-  // Steering wheel with better detail
-  scene.add(makeBox(0.50,0.12,0.95,0xdd6644,-5,0.8,-2));  // steering wheel base
-  scene.add(makeCylinder(0.22,0.22,0.10,0x554433,-5,0.90,-2));  // steering wheel
-  scene.add(makeCylinder(0.18,0.18,0.12,0x886644,-5,0.92,-2));  // wheel rim
-  scene.add(makeSphere(0.05,0xff4444,-5-0.18,0.95,-2));  // spoke highlight
-  scene.add(makeSphere(0.05,0xff4444,-5+0.18,0.95,-2));  // spoke highlight
-  // Pedal area
-  scene.add(makeBox(0.60,0.06,0.30,0x333333,-5,0.42,-2));
-  // Shift gear area  
-  scene.add(makeBox(0.15,0.30,0.10,0x664422,-5-0.35,0.70,-2));
-  scene.add(makeBox(0.15,0.30,0.10,0x664422,-5+0.35,0.70,-2));
+
+
+
+
 
   // ── Prize counter along north wall (with center opening) ──────────────────
   // Left section of counter
@@ -2215,10 +2115,12 @@ function buildWorkshop(){
   scene.add(makeBox(.88,1.00,.64,0x9090cc, 6,1.50, 2));
   scene.add(makeBox(.12,.60,.08,0x2244aa, 6,1.94,2.3));  // chest strap
   // Eyes already installed — glowing
-  scene.add(makeSphere(.14,0xff2222, 5.76,1.84,2.35));
-  scene.add(makeSphere(.14,0xff2222, 6.24,1.84,2.35));
-  scene.add(makeSphere(.06,0xff8888, 5.76,1.84,2.42));  // glow core L
-  scene.add(makeSphere(.06,0xff8888, 6.24,1.84,2.42));  // glow core R
+  if(activatedBots.has('gbear')){
+    scene.add(makeSphere(.14,0xff2222, 5.76,1.84,2.35));
+    scene.add(makeSphere(.14,0xff2222, 6.24,1.84,2.35));
+    scene.add(makeSphere(.06,0xff8888, 5.76,1.84,2.42));  // glow core L
+    scene.add(makeSphere(.06,0xff8888, 6.24,1.84,2.42));  // glow core R
+  }
 
   // ── Leg pairs on floor ─────────────────────────────────────────────────────
   [[-5.5,4],[-3.5,6],[7.5,-4],[8.5,-6]].forEach(function(p,i){
@@ -2311,10 +2213,12 @@ function buildWorkshop(){
   // Endoskeleton "body" lying on table
   scene.add(makeBox(.54,.80,.42,0x445566, 2,1.48,2));       // torso
   scene.add(makeSphere(.36,0x334455, 2,2.02,2));             // head
-  scene.add(makeSphere(.10,0xff3333, 1.83,2.10,2.22));       // eye L (lit)
-  scene.add(makeSphere(.10,0xff3333, 2.17,2.10,2.22));       // eye R (lit)
-  scene.add(makeSphere(.05,0xff8888, 1.83,2.10,2.28));
-  scene.add(makeSphere(.05,0xff8888, 2.17,2.10,2.28));
+  if(activatedBots.has('endo')){
+    scene.add(makeSphere(.10,0xff3333, 1.83,2.10,2.22));       // eye L (lit)
+    scene.add(makeSphere(.10,0xff3333, 2.17,2.10,2.22));       // eye R (lit)
+    scene.add(makeSphere(.05,0xff8888, 1.83,2.10,2.28));
+    scene.add(makeSphere(.05,0xff8888, 2.17,2.10,2.28));
+  }
   scene.add(makeBox(.18,.52,.18,0x3a4a55, 1.28,1.30,2));    // arm L (extended)
   scene.add(makeBox(.18,.52,.18,0x3a4a55, 2.72,1.30,2));    // arm R
   scene.add(makeBox(.22,.50,.22,0x334455, 1.72,0.80,2));    // leg L
@@ -2323,6 +2227,16 @@ function buildWorkshop(){
   scene.add(makeBox(.04,.60,.04,0xff4444, 2,.78,1.88));
   scene.add(makeBox(.04,.60,.04,0x4444ff, 2.06,.78,1.88));
   addLabel('⚠ ENDO-FRAME ACTIVE',2,2.8,2,'#ff3333');
+
+  // Locker
+  scene.add(makeBox(.60,2.00,.50,0x444455,8.7,1.00,6.4));
+  scene.add(makeBox(.58,.06,.48,0x333344,8.7,0.5,6.4));
+  scene.add(makeBox(.58,.06,.48,0x333344,8.7,1.5,6.4));
+  scene.add(makeBox(.02,1.80,.02,0x222222,8.7,1.00,6.15));
+  scene.add(makeBox(.55,.04,.45,0x666666,8.7,0.52,6.4)); // vent slats on door
+  for(var s=-2; s<=2; s++){
+    scene.add(makeBox(.50,.01,.02,0x777777,8.7,0.52 + s*0.15,6.38));
+  }
 
   // ── Lore labels ─────────────────────────────────────────────────────────────
   addLabel('WORKSHOP — WHERE THEY ARE BORN',0,4.2,-9,'#9944cc');
@@ -3365,7 +3279,7 @@ function doInteract(){
   }
 
   // Escape key pickup
-  if(currentSpot===keySpot&&!hasEscapeKey&&timeExpired){
+  if(currentSpot===keySpot&&!hasEscapeKey&&night>1){
     hasEscapeKey=true;
     document.getElementById('key-label').style.display='block';
     showMsg('You found the ESCAPE KEY! Head to the FRONT GATE!',4000);
@@ -3753,9 +3667,33 @@ function init(){
   }
   batteryPool.slice(0,4).forEach(function(item){ activeBatteryIds.add(item.id); });
 
+  // Set active enemies based on night
+  if(night === 1){
+    // All bots present, but only plush active
+    for(var b in bots){
+      bots[b].alive = true;
+    }
+  } else if(night === 2){
+    for(var b in bots){
+      if(['frog','panda','rhino','horse'].includes(b)) bots[b].alive = true;
+      else bots[b].alive = false;
+    }
+  } else if(night === 3){
+    for(var b in bots){
+      if(bots[b].spot === 'barn' && b !== 'dog') bots[b].alive = true;
+      else bots[b].alive = false;
+    }
+  } else if(night === 4){
+    for(var b in bots){
+      if(b === 'purple') bots[b].alive = true;
+      else bots[b].alive = false;
+    }
+  }
+
   buildRoom();
   buildWeapon();
   document.getElementById('room-name').textContent=ROOM_NAMES[currentSpot];
+  document.getElementById('night-disp').textContent='Night '+night;
   updateResourceHUD();
   updateEnemyCount();
   animate();
